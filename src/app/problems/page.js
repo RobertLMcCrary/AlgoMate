@@ -4,18 +4,21 @@ import Navbar from '../components/Navbar';
 const problems = [
     {
         id: 1,
+        routeName: 'twosum',
         title: 'Two Sum',
         difficulty: 'Easy',
         topic: 'Arrays',
     },
     {
         id: 2,
+        routeTitle: 'binarytreeinordertraversal',
         title: 'Binary Tree Inorder Traversal',
         difficulty: 'Medium',
         topic: 'Trees',
     },
     {
         id: 3,
+        routeTitle: 'longestsubstringwithoutrepeatingcharacters',
         title: 'Longest Substring Without Repeating Characters',
         difficulty: 'Hard',
         topic: 'Strings',
@@ -89,7 +92,7 @@ export default function ProblemsPage() {
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <Link
-                                            href={`/problems/${problem.id}`}
+                                            href={`/twosum`}
                                             className="text-purple-400 hover:underline"
                                         >
                                             View Problem

@@ -1,18 +1,49 @@
 'use client';
 import { useState } from 'react';
+import Navbar from '../components/Navbar';
+import Link from 'next/link';
 
 export default function ProblemPage() {
-    const [pseudoCode, setPseudoCode] = useState('');
+    const [userInput, setUserInput] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [response, setResponse] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleGeneratePseudoCode = () => {
-        // Simulated pseudocode generation
-        setPseudoCode(
-            `1. Create a hash map to store numbers and their indices.
-        2. Iterate through the array:
-            - For each number, calculate the complement (target - number).
-            - If the complement exists in the hash map, return indices.
-        3. Otherwise, add the number and its index to the hash map.`
-        );
+    const handleUserInput = async (e) => {
+        e.preventDefault();
+        if (userInput.trim()) {
+            const newMessage = { role: 'user', content: userInput };
+            const updatedMessages = [...messages, newMessage];
+            setMessages(updatedMessages);
+            setUserInput('');
+            setLoading(true);
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ messages: updatedMessages }),
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data && data.output) {
+                    setResponse(data.output);
+                } else {
+                    throw new Error('Received an empty or invalid response');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setResponse('Something went wrong. Please try again.');
+            }
+
+            setLoading(false);
+        }
     };
 
     return (
@@ -56,20 +87,29 @@ export default function ProblemPage() {
                     AI Assistant
                 </h2>
                 <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
-                    {pseudoCode ? (
-                        <pre className="text-gray-300">{pseudoCode}</pre>
+                    {response ? (
+                        <pre className="text-gray-300">{response}</pre>
                     ) : (
                         <p className="text-gray-400">
                             Ask for hints or pseudocode here.
                         </p>
                     )}
                 </div>
-                <button
-                    onClick={handleGeneratePseudoCode}
-                    className="mt-4 bg-purple-700 text-white px-6 py-2 rounded shadow hover:bg-purple-600 transition"
-                >
-                    Generate Pseudo Code
-                </button>
+                <form onSubmit={handleUserInput} className="mt-4">
+                    <input
+                        type="text"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        className="w-full p-2 rounded border border-gray-700 text-gray-200 bg-gray-800"
+                        placeholder="Ask something..."
+                    />
+                    <button
+                        type="submit"
+                        className="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded shadow hover:bg-purple-600 transition"
+                    >
+                        {loading ? 'Thinking...' : 'Send'}
+                    </button>
+                </form>
             </div>
         </div>
     );
