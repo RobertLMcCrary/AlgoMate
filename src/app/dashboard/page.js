@@ -39,7 +39,7 @@ function Dashboard() {
                         collaboration, and AI-powered insights.
                     </p>
                     <div className="flex justify-center">
-                        <Link href="/pro">
+                        <Link href="/pricing">
                             <span className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-500 transition">
                                 Learn More
                             </span>

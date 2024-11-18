@@ -35,6 +35,11 @@ function Navbar() {
                             </span>
                         </Link>
                         <Link href="/pricing">
+                            <span className="text-white text-lg font-medium hover:text-gray-300 transition">
+                                Pricing
+                            </span>
+                        </Link>
+                        <Link href="/pricing">
                             <UserButton />
                         </Link>
                     </div>
