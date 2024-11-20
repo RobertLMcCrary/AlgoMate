@@ -8,6 +8,9 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Dashboard from './dashboard/page';
 
+// Import AI-related icons from react-icons
+import { FaRobot, FaBrain, FaComments } from 'react-icons/fa';
+
 //clerk
 import { SignUpButton, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
@@ -25,7 +28,7 @@ function Home() {
                     </h1>
                     <p className="text-lg md:text-xl text-gray-200 mb-8">
                         Solve LeetCode problems like a pro, with AI-generated
-                        hints and music to keep you focused.
+                        hints and pseudo code to keep you focused.
                     </p>
                     <div className="flex justify-center items-center gap-4">
                         <SignUpButton className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition">
@@ -47,21 +50,16 @@ function Home() {
                             Our platform helps you break through mental blocks
                             with:
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                             <FeatureCard
-                                title="AI-Generated Hints"
-                                description="Get smart suggestions and pseudo-code to overcome tricky problems."
-                                icon="/ai-icon.svg"
+                                title="AI Assistant"
+                                description="Smart suggestions from our AI assistant to overcome tricky problems."
+                                Icon={FaRobot}
                             />
                             <FeatureCard
-                                title="Focus Mode"
-                                description="Background music to keep you in the zone."
-                                icon="/music-icon.svg"
-                            />
-                            <FeatureCard
-                                title="Interview Readiness"
-                                description="Practice lock-in sessions to simulate real interviews."
-                                icon="/interview-icon.svg"
+                                title="Pseudo Code Hints"
+                                description="AI Generated Pseudo Code to help you understand complicated problems."
+                                Icon={FaComments}
                             />
                         </div>
                     </section>
@@ -131,16 +129,10 @@ function Home() {
     );
 }
 
-function FeatureCard({ title, description, icon }) {
+function FeatureCard({ title, description, Icon }) {
     return (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-            <Image
-                src={icon}
-                alt={title}
-                width={60}
-                height={60}
-                className="mx-auto mb-4"
-            />
+            <Icon className="w-12 h-12 mx-auto mb-4 text-purple-500" />
             <h4 className="text-xl font-semibold">{title}</h4>
             <p className="text-gray-400 mt-2">{description}</p>
         </div>

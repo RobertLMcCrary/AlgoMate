@@ -3,6 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { FaLightbulb, FaEyeSlash, FaStar } from 'react-icons/fa';
 
 function About() {
     return (
@@ -33,17 +34,17 @@ function About() {
                     <FeatureCard
                         title="Guided Problem Solving"
                         description="Receive hints tailored to your current progress to nudge you toward the right path."
-                        icon="/guide-icon.svg"
+                        Icon={FaLightbulb}
                     />
                     <FeatureCard
                         title="No Spoilers"
                         description="Instead of revealing the solution, we offer pseudo-code and explanations to help you learn effectively."
-                        icon="/no-spoiler-icon.svg"
+                        Icon={FaEyeSlash}
                     />
                     <FeatureCard
                         title="Interview Confidence"
                         description="Practice under realistic conditions with tools that mimic the pressure of real interviews."
-                        icon="/confidence-icon.svg"
+                        Icon={FaStar}
                     />
                 </section>
                 <section className="bg-gray-800 py-12 px-4 rounded-lg shadow-lg text-center mt-16">
@@ -63,16 +64,10 @@ function About() {
     );
 }
 
-function FeatureCard({ title, description, icon }) {
+function FeatureCard({ title, description, Icon }) {
     return (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-            <Image
-                src={icon}
-                alt={title}
-                width={60}
-                height={60}
-                className="mx-auto mb-4"
-            />
+            <Icon className="w-12 h-12 mx-auto mb-4 text-purple-500" />
             <h4 className="text-xl font-semibold">{title}</h4>
             <p className="text-gray-400 mt-2">{description}</p>
         </div>

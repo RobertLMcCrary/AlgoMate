@@ -39,6 +39,11 @@ function Navbar() {
                                 Pricing
                             </span>
                         </Link>
+                        <Link href="/contact">
+                            <span className="text-white text-lg font-medium hover:text-gray-300 transition">
+                                Contact
+                            </span>
+                        </Link>
                         <Link href="/pricing">
                             <UserButton />
                         </Link>
@@ -61,6 +66,11 @@ function Navbar() {
                         <Link href="/pricing">
                             <span className="text-white text-lg font-medium hover:text-gray-300 transition">
                                 Pricing
+                            </span>
+                        </Link>
+                        <Link href="/contact">
+                            <span className="text-white text-lg font-medium hover:text-gray-300 transition">
+                                Contact
                             </span>
                         </Link>
                         <SignInButton className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition">
