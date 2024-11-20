@@ -1,7 +1,7 @@
 const JUDGE0_API = 'https://judge0-ce.p.rapidapi.com';
 
 export async function POST(req) {
-    const { code, language, testCases } = await req.json();
+    const { code, language, problemId, testCases } = await req.json();
 
     // Language IDs for Judge0
     const languageIds = {

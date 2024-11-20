@@ -64,12 +64,31 @@ export default function ProblemPage() {
         }
     }, [params.id])
 
-    //handling user input for the chatbot
     const handleUserInput = async (e) => {
         e.preventDefault();
         if (userInput.trim()) {
-            const newMessage = { role: 'user', content: userInput };
-            const updatedMessages = [...messages, newMessage];
+            // Create a system message with instructions and problem context
+            const systemMessage = {
+                role: 'system',
+                content: `You are a coding mentor helping with the problem "${problem?.title}". 
+                     IMPORTANT: DO NOT provide direct solutions or complete code answers.
+                     Instead:
+                     1. Provide hints and guidance
+                     2. Ask leading questions
+                     3. Explain relevant concepts
+                     4. Suggest approaches without giving the solution
+                     5. If asked for the solution, remind the user that you can only provide hints
+                     
+                     Problem Context:
+                     ${problem?.description}
+                     Difficulty: ${problem?.difficulty}
+                     Topics: ${problem?.topics}`
+            };
+
+            const userMessage = { role: 'user', content: userInput };
+            // Include both system message and user message
+            const updatedMessages = [...messages, systemMessage, userMessage];
+
             setMessages(updatedMessages);
             setUserInput('');
             setLoading(true);
@@ -106,7 +125,7 @@ export default function ProblemPage() {
     const runCode = async () => {
         setIsRunning(true);
         setResults(null);
-    
+
         try {
             const res = await fetch('/api/submit', {
                 method: 'POST',
@@ -119,13 +138,13 @@ export default function ProblemPage() {
                     testCases: problem.testCases
                 }),
             });
-    
+
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
-    
+
             const data = await res.json();
-            
+
             if (data.results[0].error === 'Rate limit exceeded') {
                 setResults([{
                     testCase: 'Error',
@@ -134,7 +153,7 @@ export default function ProblemPage() {
                 }]);
                 return;
             }
-    
+
             setResults(data.results);
         } catch (error) {
             setResults([{
@@ -144,6 +163,57 @@ export default function ProblemPage() {
             }]);
         } finally {
             setIsRunning(false);
+        }
+    };
+
+    //generating pseudo code in the editor
+    const generatePseudoCode = async () => {
+        try {
+            // Create a system message specifically for pseudo code generation
+            const systemMessage = {
+                role: 'system',
+                content: `You are a coding mentor helping with the problem "${problem?.title}". 
+                         Generate clear, step-by-step pseudocode for this problem.
+                         The pseudocode should be detailed enough to guide the solution but not give away the exact implementation.
+                         
+                         Problem Context:
+                         ${problem?.description}
+                         Difficulty: ${problem?.difficulty}
+                         Topics: ${problem?.topics}`
+            };
+
+            const userMessage = {
+                role: 'user',
+                content: 'Generate pseudocode for this problem. Make it clear and educational.'
+            };
+
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    messages: [systemMessage, userMessage]
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (data && data.output) {
+                // Format the pseudo code as a multi-line comment based on the language
+                const commentPrefix = selectedLanguage === 'python' ? '#' : '//';
+                const pseudoCode = `/*\nPSEUDO CODE:\n${data.output
+                    .split('\n')
+                    .map(line => line.trim())
+                    .join('\n')}\n*/\n\n${code}`;
+
+                setCode(pseudoCode);
+            }
+        } catch (error) {
+            console.error('Error generating pseudo code:', error);
         }
     };
 
@@ -231,7 +301,7 @@ export default function ProblemPage() {
                 )}
             </Panel>
 
-            <PanelResizeHandle className='w-[5px] bg-gray-700' />
+            <PanelResizeHandle className='w-[5px] bg-gray-800 hover:bg-gray-700' />
 
             {/* Code Editor Section */}
             <Panel defaultSize={50} minSize={30} className="w-[50vw] bg-gray-800 p-6 h-[100vh]">
@@ -306,6 +376,12 @@ export default function ProblemPage() {
                         ) : (
                             'Run Code'
                         )}
+                    </button>
+                    <button
+                        onClick={generatePseudoCode}
+                        className="px-4 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition text-sm font-medium"
+                    >
+                        Generate Pseudo Code
                     </button>
                     <button
                         onClick={() => setCode(problem?.starterCodes[selectedLanguage])}
@@ -404,7 +480,7 @@ export default function ProblemPage() {
                 )}
             </Panel>
 
-            <PanelResizeHandle className='w-[5px] bg-gray-700' />
+            <PanelResizeHandle className='w-[5px] bg-gray-800  hover:bg-gray-700' />
 
             {/* AI Chat Section */}
             <Panel defaultSize={25} minSize={20} className="w-1/4 bg-gray-800 p-6 flex flex-col h-[100vh]">

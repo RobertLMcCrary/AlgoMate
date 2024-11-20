@@ -43,35 +43,10 @@ function Dashboard() {
                     </div>
                 </section>
 
-                {/* Learning Paths */}
-                <section className="mb-8">
-                    <h3 className="text-3xl font-bold mb-6">Learning Paths</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-bold mb-3">Arrays & Strings</h4>
-                            <div className="bg-gray-700 w-full h-2 rounded-full mb-3">
-                                <div className="bg-green-500 w-1/3 h-2 rounded-full"></div>
-                            </div>
-                            <Link href="/path/arrays">
-                                <span className="text-green-400 hover:text-green-300">Continue Learning →</span>
-                            </Link>
-                        </div>
-                        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <h4 className="text-xl font-bold mb-3">Dynamic Programming</h4>
-                            <div className="bg-gray-700 w-full h-2 rounded-full mb-3">
-                                <div className="bg-green-500 w-1/4 h-2 rounded-full"></div>
-                            </div>
-                            <Link href="/path/dp">
-                                <span className="text-green-400 hover:text-green-300">Start Learning →</span>
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
                 {/* Quick Access Section */}
                 <section>
                     <h3 className="text-3xl font-bold mb-6">Quick Access</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                         <QuickAccessCard
                             title="Practice Problems"
                             description="Browse our collection of coding challenges."
@@ -80,12 +55,7 @@ function Dashboard() {
                         <QuickAccessCard
                             title="Interview Prep"
                             description="Get ready for technical interviews."
-                            href="/interview-prep"
-                        />
-                        <QuickAccessCard
-                            title="Learning Resources"
-                            description="Access tutorials and guides."
-                            href="/resources"
+                            href="/problems"
                         />
                     </div>
                 </section>
@@ -95,19 +65,19 @@ function Dashboard() {
                     <h3 className="text-3xl font-bold mb-6">Community Updates</h3>
                     <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
                         <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-xl font-bold">Join Our Discord</h4>
+                            <h4 className="text-xl font-bold">We Are Open Source!</h4>
                             <span className="bg-indigo-600 px-3 py-1 rounded-full text-sm">New</span>
                         </div>
                         <p className="text-gray-300 mb-4">
                             Connect with fellow developers, share solutions, and get help from the community.
                         </p>
                         <a
-                            href="https://discord.gg/yourlink"
+                            href="https://github.com/RobertLMcCrary/PseudoAI.git"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-indigo-500 transition"
                         >
-                            Join Community
+                            Contribute
                         </a>
                     </div>
                 </section>
