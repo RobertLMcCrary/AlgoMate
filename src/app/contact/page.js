@@ -12,7 +12,7 @@ function Contact() {
         e.preventDefault();
         const subject = encodeURIComponent('Contact Form Submission');
         const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-        const mailtoLink = `mailto:your-email@example.com?subject=${subject}&body=${body}`;
+        const mailtoLink = `mailto:rlmccrary1210@gmail.com?subject=${subject}&body=${body}`;
         window.location.href = mailtoLink; // Redirect to mailto link
     };
 
