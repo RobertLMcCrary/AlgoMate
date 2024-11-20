@@ -8,30 +8,121 @@ export async function POST(req) {
         javascript: 63,
         python: 71,
         cpp: 54,
-        java: 62
+        java: 62,
     };
 
     try {
         // Create wrapper code based on language
         let wrappedCode = code;
         let formattedInput = '';
-        
+
         switch (language) {
             case 'javascript':
-                formattedInput = `const input = ${JSON.stringify(testCases[0].input)};\n` +
-                                `const nums = input.nums;\n` +
-                                `const target = input.target;\n` +
-                                `console.log(JSON.stringify(twoSum(nums, target)));`;
+                switch (problemId) {
+                    case 'two-sum':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` +
+                            `const nums = input.nums;\n` +
+                            `const target = input.target;\n` +
+                            `console.log(JSON.stringify(twoSum(nums, target)));`;
+                        break;
+                    case 'reverse-string':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` +
+                            `console.log(JSON.stringify(reverseString(input)));`;
+                        break;
+                    case 'valid-parentheses':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` +
+                            `console.log(JSON.stringify(isValid(input)));`;
+                        break;
+                    case 'maximum-subarray':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` + `console.log(maxSubArray(input.nums));`;
+                        break;
+                    case 'merge-two-sorted-lists':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` +
+                            `console.log(JSON.stringify(mergeTwoLists(input.l1, input.l2)));`;
+                        break;
+                    case 'climbing-stairs':
+                        formattedInput =
+                            `const input = ${JSON.stringify(
+                                testCases[0].input
+                            )};\n` + `console.log(climbStairs(input.n));`;
+                        break;
+                    // Add more cases for other problems as needed
+                }
                 wrappedCode = `${code}\n${formattedInput}`;
                 break;
+
             case 'python':
-                formattedInput = `import json\n` +
-                                `input = json.loads('${JSON.stringify(testCases[0].input)}')\n` +
-                                `nums, target = input['nums'], input['target']\n` +
-                                `print(json.dumps(twoSum(nums, target)))`;
+                switch (problemId) {
+                    case 'two-sum':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `nums, target = input['nums'], input['target']\n` +
+                            `print(json.dumps(twoSum(nums, target)))`;
+                        break;
+                    case 'reverse-string':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `print(json.dumps(reverseString(input)))`;
+                        break;
+                    case 'valid-parentheses':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `print(isValid(input))`;
+                        break;
+                    case 'maximum-subarray':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `print(maxSubArray(input['nums']))`;
+                        break;
+                    case 'merge-two-sorted-lists':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `print(mergeTwoLists(input['l1'], input['l2']))`;
+                        break;
+                    case 'climbing-stairs':
+                        formattedInput =
+                            `import json\n` +
+                            `input = json.loads('${JSON.stringify(
+                                testCases[0].input
+                            )}')\n` +
+                            `print(climbStairs(input['n']))`;
+                        break;
+                    // Add more cases for other problems as needed
+                }
                 wrappedCode = `${code}\n${formattedInput}`;
                 break;
-            // Add other language cases as needed
+
+            // Add cases for C++ and Java as needed
         }
 
         const submission = await fetch(`${JUDGE0_API}/submissions`, {
@@ -39,14 +130,14 @@ export async function POST(req) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
             },
             body: JSON.stringify({
                 source_code: wrappedCode,
                 language_id: languageIds[language],
-                stdin: '',  // Input is now part of the code
-                expected_output: JSON.stringify(testCases[0].output)
-            })
+                stdin: '', // Input is now part of the code
+                expected_output: JSON.stringify(testCases[0].output),
+            }),
         });
 
         if (!submission.ok) {
@@ -56,17 +147,23 @@ export async function POST(req) {
         const { token } = await submission.json();
         const result = await pollSubmission(token, testCases[0]);
 
-        return new Response(JSON.stringify({ results: [result] }), { status: 200 });
+        return new Response(JSON.stringify({ results: [result] }), {
+            status: 200,
+        });
     } catch (error) {
         console.error('Submission error:', error);
         return new Response(
             JSON.stringify({
-                results: [{
-                    testCase: 'Error',
-                    passed: false,
-                    error: error.message,
-                    input: testCases[0].input
-                }]
+                results: [
+                    {
+                        testCase: 'Error',
+                        passed: false,
+                        error: error.message || 'An unexpected error occurred',
+                        input: testCases?.[0]?.input || {},
+                        expected: testCases?.[0]?.output || null,
+                        received: null,
+                    },
+                ],
             }),
             { status: 200 }
         );
@@ -79,30 +176,37 @@ async function pollSubmission(token, testCase) {
         const response = await fetch(`${JUDGE0_API}/submissions/${token}`, {
             headers: {
                 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY
-            }
+                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+            },
         });
 
         const result = await response.json();
-        
-        if (result.status.id > 2) { // Not queued or processing
+
+        if (result.status.id > 2) {
+            // Not queued or processing
             try {
-                const output = result.stdout ? JSON.parse(result.stdout.trim()) : null;
+                const output = result.stdout
+                    ? JSON.parse(result.stdout.trim())
+                    : null;
                 const expected = testCase.output;
-                
+
                 // Compare arrays regardless of order
-                const passed = Array.isArray(output) && 
-                             Array.isArray(expected) &&
-                             output.length === expected.length &&
-                             output.every(val => expected.includes(val));
+                const passed =
+                    Array.isArray(output) &&
+                    Array.isArray(expected) &&
+                    output.length === expected.length &&
+                    output.every((val) => expected.includes(val));
 
                 return {
                     testCase: 1,
                     passed: passed,
-                    error: result.status.id !== 3 ? result.status.description : null,
+                    error:
+                        result.status.id !== 3
+                            ? result.status.description
+                            : null,
                     input: testCase.input,
                     expected: expected,
-                    received: output
+                    received: output,
                 };
             } catch (error) {
                 return {
@@ -111,13 +215,13 @@ async function pollSubmission(token, testCase) {
                     error: 'Invalid output format',
                     input: testCase.input,
                     expected: testCase.output,
-                    received: result.stdout
+                    received: result.stdout,
                 };
             }
         }
 
         attempts++;
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     throw new Error('Submission timeout');

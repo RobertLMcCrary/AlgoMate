@@ -2,21 +2,17 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import problems from '../../../data/problems.json'
+import problems from '../../../data/problems.json';
 
 //react markdown
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
 //resizable panels
-import {
-    PanelGroup,
-    Panel,
-    PanelResizeHandle
-} from 'react-resizable-panels'
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 //code mirror
 import CodeMirror from '@uiw/react-codemirror';
@@ -28,10 +24,9 @@ import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorView } from '@codemirror/view';
 import { indentUnit } from '@codemirror/language';
 
-
 export default function ProblemPage() {
     //fetching the problems
-    const params = useParams()
+    const params = useParams();
     const [problem, setProblem] = useState(null);
 
     //user input state management for the ai chatbot
@@ -39,30 +34,33 @@ export default function ProblemPage() {
     const [messages, setMessages] = useState([]);
     const [response, setResponse] = useState('');
     const [loading, setLoading] = useState(false);
-    const [code, setCode] = useState('')
-    const [isRunning, setIsRunning] = useState(false)
-    const [results, setResults] = useState(null)
-    const [selectedLanguage, setSelectedLanguage] = useState('javascript')
+    const [code, setCode] = useState('');
+    const [isRunning, setIsRunning] = useState(false);
+    const [results, setResults] = useState(null);
+    const [selectedLanguage, setSelectedLanguage] = useState('javascript');
+
+    //popups
+    const [showPopup, setShowPopup] = useState(false);
 
     //language map for selecting language
     const languageMap = {
         javascript: javascript({ jsx: true }),
         python: python(),
-    }
+    };
 
     useEffect(() => {
         if (problem && problem.starterCodes) {
-            setCode(problem.starterCodes[selectedLanguage])
+            setCode(problem.starterCodes[selectedLanguage]);
         }
-    }, [problem, selectedLanguage])
+    }, [problem, selectedLanguage]);
 
     //fetch problems
     useEffect(() => {
         if (params.id) {
-            const problemData = problems.find(p => p.id === params.id)
-            setProblem(problemData)
+            const problemData = problems.find((p) => p.id === params.id);
+            setProblem(problemData);
         }
-    }, [params.id])
+    }, [params.id]);
 
     const handleUserInput = async (e) => {
         e.preventDefault();
@@ -82,7 +80,7 @@ export default function ProblemPage() {
                      Problem Context:
                      ${problem?.description}
                      Difficulty: ${problem?.difficulty}
-                     Topics: ${problem?.topics}`
+                     Topics: ${problem?.topics}`,
             };
 
             const userMessage = { role: 'user', content: userInput };
@@ -135,7 +133,8 @@ export default function ProblemPage() {
                 body: JSON.stringify({
                     code,
                     language: selectedLanguage,
-                    testCases: problem.testCases
+                    problemId: problem.id, // Add this
+                    testCases: problem.testCases,
                 }),
             });
 
@@ -146,21 +145,25 @@ export default function ProblemPage() {
             const data = await res.json();
 
             if (data.results[0].error === 'Rate limit exceeded') {
-                setResults([{
-                    testCase: 'Error',
-                    passed: false,
-                    error: 'Rate limit exceeded. Please wait a moment and try again.'
-                }]);
+                setResults([
+                    {
+                        testCase: 'Error',
+                        passed: false,
+                        error: 'Rate limit exceeded. Please wait a moment and try again.',
+                    },
+                ]);
                 return;
             }
 
             setResults(data.results);
         } catch (error) {
-            setResults([{
-                testCase: 'Error',
-                passed: false,
-                error: 'Failed to run code. Please try again.'
-            }]);
+            setResults([
+                {
+                    testCase: 'Error',
+                    passed: false,
+                    error: 'Failed to run code. Please try again.',
+                },
+            ]);
         } finally {
             setIsRunning(false);
         }
@@ -179,12 +182,13 @@ export default function ProblemPage() {
                          Problem Context:
                          ${problem?.description}
                          Difficulty: ${problem?.difficulty}
-                         Topics: ${problem?.topics}`
+                         Topics: ${problem?.topics}`,
             };
 
             const userMessage = {
                 role: 'user',
-                content: 'Generate pseudocode for this problem. Make it clear and educational.'
+                content:
+                    'Generate pseudocode for this problem. Make it clear and educational.',
             };
 
             const res = await fetch('/api/chat', {
@@ -193,7 +197,7 @@ export default function ProblemPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    messages: [systemMessage, userMessage]
+                    messages: [systemMessage, userMessage],
                 }),
             });
 
@@ -204,10 +208,11 @@ export default function ProblemPage() {
             const data = await res.json();
             if (data && data.output) {
                 // Format the pseudo code as a multi-line comment based on the language
-                const commentPrefix = selectedLanguage === 'python' ? '#' : '//';
+                const commentPrefix =
+                    selectedLanguage === 'python' ? '#' : '//';
                 const pseudoCode = `/*\nPSEUDO CODE:\n${data.output
                     .split('\n')
-                    .map(line => line.trim())
+                    .map((line) => line.trim())
                     .join('\n')}\n*/\n\n${code}`;
 
                 setCode(pseudoCode);
@@ -226,10 +231,11 @@ export default function ProblemPage() {
             {results.map((result, index) => (
                 <div
                     key={index}
-                    className={`p-2 mb-2 rounded ${result.passed
-                        ? 'bg-green-900/50 text-green-200'
-                        : 'bg-red-900/50 text-red-200'
-                        }`}
+                    className={`p-2 mb-2 rounded ${
+                        result.passed
+                            ? 'bg-green-900/50 text-green-200'
+                            : 'bg-red-900/50 text-red-200'
+                    }`}
                 >
                     <div className="font-semibold flex items-center gap-2">
                         <span>Test Case {result.testCase}:</span>
@@ -241,12 +247,22 @@ export default function ProblemPage() {
                     </div>
                     <div className="text-sm mt-1">
                         {result.error ? (
-                            <div className="text-red-300">Error: {result.error}</div>
+                            <div className="text-red-300">
+                                Error: {result.error}
+                            </div>
                         ) : (
                             <>
-                                <div>Input: nums = {JSON.stringify(result.input.nums)}, target = {result.input.target}</div>
-                                <div>Expected: {JSON.stringify(result.expected)}</div>
-                                <div>Received: {JSON.stringify(result.received)}</div>
+                                <div>
+                                    Input: nums ={' '}
+                                    {JSON.stringify(result.input.nums)}, target
+                                    = {result.input.target}
+                                </div>
+                                <div>
+                                    Expected: {JSON.stringify(result.expected)}
+                                </div>
+                                <div>
+                                    Received: {JSON.stringify(result.received)}
+                                </div>
                             </>
                         )}
                     </div>
@@ -254,31 +270,47 @@ export default function ProblemPage() {
             ))}
             {/* Show overall result */}
             {results.length > 0 && (
-                <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${results.every(r => r.passed)
-                    ? 'bg-green-900/50 text-green-200'
-                    : 'bg-red-900/50 text-red-200'
-                    }`}>
-                    {results.every(r => r.passed)
+                <div
+                    className={`mt-4 p-3 rounded-lg text-center font-semibold ${
+                        results.every((r) => r.passed)
+                            ? 'bg-green-900/50 text-green-200'
+                            : 'bg-red-900/50 text-red-200'
+                    }`}
+                >
+                    {results.every((r) => r.passed)
                         ? '🎉 All Test Cases Passed!'
-                        : `${results.filter(r => r.passed).length}/${results.length} Test Cases Passed`
-                    }
+                        : `${results.filter((r) => r.passed).length}/${
+                              results.length
+                          } Test Cases Passed`}
                 </div>
             )}
         </div>
     );
 
-
     return (
-        <PanelGroup direction='horizontal' className="flex h-screen">
+        <PanelGroup direction="horizontal" className="flex h-screen">
             {/* Problem Section */}
-            <Panel defaultSize={25} minSize={20} className="w-1/4 bg-gray-800 text-gray-200 p-6 overflow-y-auto">
-                <Link className='text-blue-500 hover:underline' href="/problems">Back to Problems</Link>
+            <Panel
+                defaultSize={25}
+                minSize={20}
+                className="w-1/4 bg-gray-800 text-gray-200 p-6 overflow-y-auto"
+            >
+                <Link
+                    className="text-blue-500 hover:underline"
+                    href="/problems"
+                >
+                    Back to Problems
+                </Link>
                 {problem ? (
                     <>
                         <h2 className="text-2xl font-bold">{problem.title}</h2>
                         <div className="flex gap-2 mt-2">
-                            <span className="text-sm bg-blue-500 px-2 py-1 rounded">{problem.difficulty}</span>
-                            <span className="text-sm bg-purple-500 px-2 py-1 rounded">{problem.topics}</span>
+                            <span className="text-sm bg-blue-500 px-2 py-1 rounded">
+                                {problem.difficulty}
+                            </span>
+                            <span className="text-sm bg-purple-500 px-2 py-1 rounded">
+                                {problem.topics}
+                            </span>
                         </div>
                         <p className="mt-4">{problem.description}</p>
                         <h3 className="mt-6 font-semibold">Constraints:</h3>
@@ -289,7 +321,10 @@ export default function ProblemPage() {
                         </ul>
                         <h3 className="mt-6 font-semibold">Examples:</h3>
                         {problem.examples.map((example, idx) => (
-                            <pre key={idx} className="bg-gray-700 p-4 rounded mt-2 whitespace-pre-wrap break-words max-w-full overflow-x-hidden text-left">
+                            <pre
+                                key={idx}
+                                className="bg-gray-700 p-4 rounded mt-2 whitespace-pre-wrap break-words max-w-full overflow-x-hidden text-left"
+                            >
                                 Input: {example.input}
                                 <br />
                                 Output: {example.output}
@@ -301,10 +336,14 @@ export default function ProblemPage() {
                 )}
             </Panel>
 
-            <PanelResizeHandle className='w-[5px] bg-gray-800 hover:bg-gray-700' />
+            <PanelResizeHandle className="w-[5px] bg-gray-800 hover:bg-gray-700" />
 
             {/* Code Editor Section */}
-            <Panel defaultSize={50} minSize={30} className="w-[50vw] bg-gray-800 p-6 h-[100vh]">
+            <Panel
+                defaultSize={50}
+                minSize={30}
+                className="w-[50vw] bg-gray-800 p-6 h-[100vh]"
+            >
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-purple-400">
                         Code Editor
@@ -367,9 +406,24 @@ export default function ProblemPage() {
                     >
                         {isRunning ? (
                             <span className="flex items-center justify-center gap-2">
-                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                <svg
+                                    className="animate-spin h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        fill="none"
+                                    />
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
                                 </svg>
                                 Running...
                             </span>
@@ -384,7 +438,9 @@ export default function ProblemPage() {
                         Generate Pseudo Code
                     </button>
                     <button
-                        onClick={() => setCode(problem?.starterCodes[selectedLanguage])}
+                        onClick={() =>
+                            setCode(problem?.starterCodes[selectedLanguage])
+                        }
                         className="px-4 py-2.5 rounded border border-gray-600 text-gray-300 
                      hover:bg-gray-700 transition text-sm font-medium"
                     >
@@ -401,28 +457,50 @@ export default function ProblemPage() {
                         {results.map((result, index) => (
                             <div
                                 key={index}
-                                className={`p-2 mb-2 rounded ${result.passed
-                                    ? 'bg-green-900/50 text-green-200'
-                                    : 'bg-red-900/50 text-red-200'
-                                    }`}
+                                className={`p-2 mb-2 rounded ${
+                                    result.passed
+                                        ? 'bg-green-900/50 text-green-200'
+                                        : 'bg-red-900/50 text-red-200'
+                                }`}
                             >
                                 <div className="font-semibold flex items-center gap-2">
                                     <span>Test Case {result.testCase}:</span>
                                     {result.passed ? (
-                                        <span className="text-green-400">✓ Passed</span>
+                                        <span className="text-green-400">
+                                            ✓ Passed
+                                        </span>
                                     ) : (
-                                        <span className="text-red-400">✗ Failed</span>
+                                        <span className="text-red-400">
+                                            ✗ Failed
+                                        </span>
                                     )}
                                 </div>
                                 {!result.passed && (
                                     <div className="text-sm mt-1">
                                         {result.error ? (
-                                            <div className="text-red-300">Error: {result.error}</div>
+                                            <div className="text-red-300">
+                                                Error: {result.error}
+                                            </div>
                                         ) : (
                                             <>
-                                                <div>Input: {JSON.stringify(result.input)}</div>
-                                                <div>Expected: {JSON.stringify(result.expected)}</div>
-                                                <div>Received: {JSON.stringify(result.received)}</div>
+                                                <div>
+                                                    Input:{' '}
+                                                    {JSON.stringify(
+                                                        result.input
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    Expected:{' '}
+                                                    {JSON.stringify(
+                                                        result.expected
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    Received:{' '}
+                                                    {JSON.stringify(
+                                                        result.received
+                                                    )}
+                                                </div>
                                             </>
                                         )}
                                     </div>
@@ -431,14 +509,18 @@ export default function ProblemPage() {
                         ))}
                         {/* Overall Results Summary */}
                         {results.length > 0 && (
-                            <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${results.every(r => r.passed)
-                                ? 'bg-green-900/50 text-green-200'
-                                : 'bg-red-900/50 text-red-200'
-                                }`}>
-                                {results.every(r => r.passed)
+                            <div
+                                className={`mt-4 p-3 rounded-lg text-center font-semibold ${
+                                    results.every((r) => r.passed)
+                                        ? 'bg-green-900/50 text-green-200'
+                                        : 'bg-red-900/50 text-red-200'
+                                }`}
+                            >
+                                {results.every((r) => r.passed)
                                     ? '🎉 All Test Cases Passed!'
-                                    : `${results.filter(r => r.passed).length}/${results.length} Test Cases Passed`
-                                }
+                                    : `${
+                                          results.filter((r) => r.passed).length
+                                      }/${results.length} Test Cases Passed`}
                             </div>
                         )}
                     </div>
@@ -453,13 +535,15 @@ export default function ProblemPage() {
                         {results.map((result, index) => (
                             <div
                                 key={index}
-                                className={`p-2 mb-2 rounded ${result.passed
-                                    ? 'bg-green-900/50 text-green-200'
-                                    : 'bg-red-900/50 text-red-200'
-                                    }`}
+                                className={`p-2 mb-2 rounded ${
+                                    result.passed
+                                        ? 'bg-green-900/50 text-green-200'
+                                        : 'bg-red-900/50 text-red-200'
+                                }`}
                             >
                                 <div className="font-semibold">
-                                    Test Case {result.testCase}: {result.passed ? 'Passed' : 'Failed'}
+                                    Test Case {result.testCase}:{' '}
+                                    {result.passed ? 'Passed' : 'Failed'}
                                 </div>
                                 {!result.passed && (
                                     <div className="text-sm mt-1">
@@ -467,9 +551,15 @@ export default function ProblemPage() {
                                             <>Error: {result.error}</>
                                         ) : (
                                             <>
-                                                Expected: {JSON.stringify(result.expected)}
+                                                Expected:{' '}
+                                                {JSON.stringify(
+                                                    result.expected
+                                                )}
                                                 <br />
-                                                Received: {JSON.stringify(result.received)}
+                                                Received:{' '}
+                                                {JSON.stringify(
+                                                    result.received
+                                                )}
                                             </>
                                         )}
                                     </div>
@@ -480,10 +570,14 @@ export default function ProblemPage() {
                 )}
             </Panel>
 
-            <PanelResizeHandle className='w-[5px] bg-gray-800  hover:bg-gray-700' />
+            <PanelResizeHandle className="w-[5px] bg-gray-800  hover:bg-gray-700" />
 
             {/* AI Chat Section */}
-            <Panel defaultSize={25} minSize={20} className="w-1/4 bg-gray-800 p-6 flex flex-col h-[100vh]">
+            <Panel
+                defaultSize={25}
+                minSize={20}
+                className="w-1/4 bg-gray-800 p-6 flex flex-col h-[100vh]"
+            >
                 <h2 className="text-xl font-bold text-purple-400">
                     AI Assistant
                 </h2>
@@ -494,7 +588,13 @@ export default function ProblemPage() {
                             remarkPlugins={[remarkGfm, remarkMath]}
                             rehypePlugins={[rehypeKatex]}
                             components={{
-                                code({ node, inline, className, children, ...props }) {
+                                code({
+                                    node,
+                                    inline,
+                                    className,
+                                    children,
+                                    ...props
+                                }) {
                                     return (
                                         <code
                                             className={`${className} bg-gray-800 rounded px-1`}
@@ -502,7 +602,7 @@ export default function ProblemPage() {
                                         >
                                             {children}
                                         </code>
-                                    )
+                                    );
                                 },
                                 pre({ node, children, ...props }) {
                                     return (
@@ -512,8 +612,8 @@ export default function ProblemPage() {
                                         >
                                             {children}
                                         </pre>
-                                    )
-                                }
+                                    );
+                                },
                             }}
                         >
                             {response}
