@@ -20,17 +20,32 @@
         "testCases": [
             {
                 "input": {
-                    "nums": [2, 7, 11, 15],
+                    "nums": [
+                        2,
+                        7,
+                        11,
+                        15
+                    ],
                     "target": 9
                 },
-                "output": [0, 1]
+                "output": [
+                    0,
+                    1
+                ]
             },
             {
                 "input": {
-                    "nums": [3, 2, 4],
+                    "nums": [
+                        3,
+                        2,
+                        4
+                    ],
                     "target": 6
                 },
-                "output": [1, 2]
+                "output": [
+                    1,
+                    2
+                ]
             }
         ],
         "constraints": [
@@ -40,7 +55,7 @@
     },
     {
         "id": "reverse-string",
-        "topics" : "Two Pointers, String",
+        "topics": "Two Pointers, String",
         "difficulty": "Easy",
         "title": "Reverse String",
         "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
@@ -58,6 +73,109 @@
         ],
         "constraints": [
             "You must do this by modifying the input array in-place with O(1) extra memory."
+        ]
+    },
+    {
+        "id": "valid-parentheses",
+        "title": "Valid Parentheses",
+        "topics": "Stack, String",
+        "difficulty": "Easy",
+        "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: Open brackets must be closed by the same type of brackets, and open brackets must be closed in the correct order.",
+        "starterCodes": {
+            "javascript": "function isValid(s) {\n    // Write your code here\n    \n}",
+            "python": "def isValid(s):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public boolean isValid(String s) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "s = \"()\"",
+                "output": "true"
+            },
+            {
+                "input": "s = \"()[]{}\"",
+                "output": "true"
+            },
+            {
+                "input": "s = \"(]\"",
+                "output": "false"
+            }
+        ],
+        "constraints": [
+            "s consists of parentheses only '()[]{}'."
+        ]
+    },
+    {
+        "id": "maximum-subarray",
+        "title": "Maximum Subarray",
+        "topics": "Array, Dynamic Programming",
+        "difficulty": "Medium",
+        "description": "Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.",
+        "starterCodes": {
+            "javascript": "function maxSubArray(nums) {\n    // Write your code here\n    \n}",
+            "python": "def maxSubArray(nums):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public int maxSubArray(int[] nums) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "nums = [-2,1,-3,4,-1,2,1,-5,4]",
+                "output": "6"
+            }
+        ],
+        "constraints": [
+            "1 <= nums.length <= 105",
+            "-104 <= nums[i] <= 104"
+        ]
+    },
+    {
+        "id": "merge-two-sorted-lists",
+        "title": "Merge Two Sorted Lists",
+        "topics": "Linked List, Recursion",
+        "difficulty": "Easy",
+        "description": "Merge two sorted linked lists and return it as a sorted list. The list should be made by splicing together the nodes of the first two lists.",
+        "starterCodes": {
+            "javascript": "function mergeTwoLists(l1, l2) {\n    // Write your code here\n    \n}",
+            "python": "def mergeTwoLists(l1, l2):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "l1 = [1,2,4], l2 = [1,3,4]",
+                "output": "[1,1,2,3,4,4]"
+            }
+        ],
+        "constraints": [
+            "The number of nodes in both lists is in the range [0, 50]",
+            "-100 <= Node.val <= 100",
+            "Both l1 and l2 are sorted in non-decreasing order"
+        ]
+    },
+    {
+        "id": "climbing-stairs",
+        "title": "Climbing Stairs",
+        "topics": "Dynamic Programming",
+        "difficulty": "Easy",
+        "description": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+        "starterCodes": {
+            "javascript": "function climbStairs(n) {\n    // Write your code here\n    \n}",
+            "python": "def climbStairs(n):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public int climbStairs(int n) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "n = 2",
+                "output": "2"
+            },
+            {
+                "input": "n = 3",
+                "output": "3"
+            }
+        ],
+        "constraints": [
+            "1 <= n <= 45"
         ]
     }
 ]

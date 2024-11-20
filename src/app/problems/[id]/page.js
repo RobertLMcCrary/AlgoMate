@@ -48,8 +48,6 @@ export default function ProblemPage() {
     const languageMap = {
         javascript: javascript({ jsx: true }),
         python: python(),
-        cpp: cpp(),
-        java: java()
     }
 
     useEffect(() => {
@@ -108,7 +106,7 @@ export default function ProblemPage() {
     const runCode = async () => {
         setIsRunning(true);
         setResults(null);
-
+    
         try {
             const res = await fetch('/api/submit', {
                 method: 'POST',
@@ -118,22 +116,35 @@ export default function ProblemPage() {
                 body: JSON.stringify({
                     code,
                     language: selectedLanguage,
-                    problemId: params.id,
                     testCases: problem.testCases
                 }),
             });
-
+    
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+    
             const data = await res.json();
+            
+            if (data.results[0].error === 'Rate limit exceeded') {
+                setResults([{
+                    testCase: 'Error',
+                    passed: false,
+                    error: 'Rate limit exceeded. Please wait a moment and try again.'
+                }]);
+                return;
+            }
+    
             setResults(data.results);
         } catch (error) {
             setResults([{
                 testCase: 'Error',
                 passed: false,
-                error: error.message
+                error: 'Failed to run code. Please try again.'
             }]);
+        } finally {
+            setIsRunning(false);
         }
-
-        setIsRunning(false);
     };
 
     // Updated Test Results component
@@ -143,13 +154,12 @@ export default function ProblemPage() {
                 Test Results
             </h3>
             {results.map((result, index) => (
-                <div 
+                <div
                     key={index}
-                    className={`p-2 mb-2 rounded ${
-                        result.passed 
-                            ? 'bg-green-900/50 text-green-200' 
-                            : 'bg-red-900/50 text-red-200'
-                    }`}
+                    className={`p-2 mb-2 rounded ${result.passed
+                        ? 'bg-green-900/50 text-green-200'
+                        : 'bg-red-900/50 text-red-200'
+                        }`}
                 >
                     <div className="font-semibold flex items-center gap-2">
                         <span>Test Case {result.testCase}:</span>
@@ -174,11 +184,10 @@ export default function ProblemPage() {
             ))}
             {/* Show overall result */}
             {results.length > 0 && (
-                <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${
-                    results.every(r => r.passed)
-                        ? 'bg-green-900/50 text-green-200'
-                        : 'bg-red-900/50 text-red-200'
-                }`}>
+                <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${results.every(r => r.passed)
+                    ? 'bg-green-900/50 text-green-200'
+                    : 'bg-red-900/50 text-red-200'
+                    }`}>
                     {results.every(r => r.passed)
                         ? '🎉 All Test Cases Passed!'
                         : `${results.filter(r => r.passed).length}/${results.length} Test Cases Passed`
@@ -226,7 +235,7 @@ export default function ProblemPage() {
 
             {/* Code Editor Section */}
             <Panel defaultSize={50} minSize={30} className="w-[50vw] bg-gray-800 p-6 h-[100vh]">
-            <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-purple-400">
                         Code Editor
                     </h2>
@@ -238,18 +247,15 @@ export default function ProblemPage() {
                     >
                         <option value="javascript">JavaScript</option>
                         <option value="python">Python</option>
-                        <option value="cpp">C++</option>
-                        <option value="java">Java</option>
                     </select>
                 </div>
                 <CodeMirror
                     value={code}
                     height="50vh"
                     theme={vscodeDark}
-                    extensions={[java()]}
+                    extensions={[languageMap[selectedLanguage]]}
                     onChange={(value) => setCode(value)}
                     className="overflow-hidden text-black rounded-lg border border-gray-700"
-                    tabIndex={4}
                     basicSetup={{
                         lineNumbers: true,
                         highlightActiveLineGutter: true,
@@ -282,87 +288,85 @@ export default function ProblemPage() {
                     }}
                 />
                 <div className="flex gap-2 mt-4">
-        <button 
-            onClick={runCode}
-            disabled={isRunning}
-            className="flex-1 bg-purple-700 text-white px-6 py-2.5 rounded shadow 
+                    <button
+                        onClick={runCode}
+                        disabled={isRunning}
+                        className="flex-1 bg-purple-700 text-white px-6 py-2.5 rounded shadow 
                      hover:bg-purple-600 transition disabled:opacity-50 
                      font-medium text-sm"
-        >
-            {isRunning ? (
-                <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Running...
-                </span>
-            ) : (
-                'Run Code'
-            )}
-        </button>
-        <button 
-            onClick={() => setCode(problem?.starterCodes[selectedLanguage])}
-            className="px-4 py-2.5 rounded border border-gray-600 text-gray-300 
-                     hover:bg-gray-700 transition text-sm font-medium"
-        >
-            Reset Code
-        </button>
-    </div>
-
-    {/* Test Results */}
-    {results && (
-        <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
-            <h3 className="text-lg font-semibold text-purple-400 mb-2">
-                Test Results
-            </h3>
-            {results.map((result, index) => (
-                <div 
-                    key={index}
-                    className={`p-2 mb-2 rounded ${
-                        result.passed 
-                            ? 'bg-green-900/50 text-green-200' 
-                            : 'bg-red-900/50 text-red-200'
-                    }`}
-                >
-                    <div className="font-semibold flex items-center gap-2">
-                        <span>Test Case {result.testCase}:</span>
-                        {result.passed ? (
-                            <span className="text-green-400">✓ Passed</span>
+                    >
+                        {isRunning ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Running...
+                            </span>
                         ) : (
-                            <span className="text-red-400">✗ Failed</span>
+                            'Run Code'
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setCode(problem?.starterCodes[selectedLanguage])}
+                        className="px-4 py-2.5 rounded border border-gray-600 text-gray-300 
+                     hover:bg-gray-700 transition text-sm font-medium"
+                    >
+                        Reset Code
+                    </button>
+                </div>
+
+                {/* Test Results */}
+                {results && (
+                    <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
+                        <h3 className="text-lg font-semibold text-purple-400 mb-2">
+                            Test Results
+                        </h3>
+                        {results.map((result, index) => (
+                            <div
+                                key={index}
+                                className={`p-2 mb-2 rounded ${result.passed
+                                    ? 'bg-green-900/50 text-green-200'
+                                    : 'bg-red-900/50 text-red-200'
+                                    }`}
+                            >
+                                <div className="font-semibold flex items-center gap-2">
+                                    <span>Test Case {result.testCase}:</span>
+                                    {result.passed ? (
+                                        <span className="text-green-400">✓ Passed</span>
+                                    ) : (
+                                        <span className="text-red-400">✗ Failed</span>
+                                    )}
+                                </div>
+                                {!result.passed && (
+                                    <div className="text-sm mt-1">
+                                        {result.error ? (
+                                            <div className="text-red-300">Error: {result.error}</div>
+                                        ) : (
+                                            <>
+                                                <div>Input: {JSON.stringify(result.input)}</div>
+                                                <div>Expected: {JSON.stringify(result.expected)}</div>
+                                                <div>Received: {JSON.stringify(result.received)}</div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        {/* Overall Results Summary */}
+                        {results.length > 0 && (
+                            <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${results.every(r => r.passed)
+                                ? 'bg-green-900/50 text-green-200'
+                                : 'bg-red-900/50 text-red-200'
+                                }`}>
+                                {results.every(r => r.passed)
+                                    ? '🎉 All Test Cases Passed!'
+                                    : `${results.filter(r => r.passed).length}/${results.length} Test Cases Passed`
+                                }
+                            </div>
                         )}
                     </div>
-                    {!result.passed && (
-                        <div className="text-sm mt-1">
-                            {result.error ? (
-                                <div className="text-red-300">Error: {result.error}</div>
-                            ) : (
-                                <>
-                                    <div>Input: {JSON.stringify(result.input)}</div>
-                                    <div>Expected: {JSON.stringify(result.expected)}</div>
-                                    <div>Received: {JSON.stringify(result.received)}</div>
-                                </>
-                            )}
-                        </div>
-                    )}
-                </div>
-            ))}
-            {/* Overall Results Summary */}
-            {results.length > 0 && (
-                <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${
-                    results.every(r => r.passed)
-                        ? 'bg-green-900/50 text-green-200'
-                        : 'bg-red-900/50 text-red-200'
-                }`}>
-                    {results.every(r => r.passed)
-                        ? '🎉 All Test Cases Passed!'
-                        : `${results.filter(r => r.passed).length}/${results.length} Test Cases Passed`
-                    }
-                </div>
-            )}
-        </div>
-    )}
+                )}
 
                 {/* Test Results */}
                 {results && (
@@ -373,11 +377,10 @@ export default function ProblemPage() {
                         {results.map((result, index) => (
                             <div
                                 key={index}
-                                className={`p-2 mb-2 rounded ${
-                                    result.passed 
-                                        ? 'bg-green-900/50 text-green-200' 
-                                        : 'bg-red-900/50 text-red-200'
-                                }`}
+                                className={`p-2 mb-2 rounded ${result.passed
+                                    ? 'bg-green-900/50 text-green-200'
+                                    : 'bg-red-900/50 text-red-200'
+                                    }`}
                             >
                                 <div className="font-semibold">
                                     Test Case {result.testCase}: {result.passed ? 'Passed' : 'Failed'}
@@ -405,7 +408,7 @@ export default function ProblemPage() {
 
             {/* AI Chat Section */}
             <Panel defaultSize={25} minSize={20} className="w-1/4 bg-gray-800 p-6 flex flex-col h-[100vh]">
-            <h2 className="text-xl font-bold text-purple-400">
+                <h2 className="text-xl font-bold text-purple-400">
                     AI Assistant
                 </h2>
                 <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
@@ -415,7 +418,7 @@ export default function ProblemPage() {
                             remarkPlugins={[remarkGfm, remarkMath]}
                             rehypePlugins={[rehypeKatex]}
                             components={{
-                                code({node, inline, className, children, ...props}) {
+                                code({ node, inline, className, children, ...props }) {
                                     return (
                                         <code
                                             className={`${className} bg-gray-800 rounded px-1`}
@@ -425,7 +428,7 @@ export default function ProblemPage() {
                                         </code>
                                     )
                                 },
-                                pre({node, children, ...props}) {
+                                pre({ node, children, ...props }) {
                                     return (
                                         <pre
                                             className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
