@@ -24,8 +24,7 @@ function Pricing() {
                         features={[
                             'Access to LeetCode hints',
                             'Pseudo Code Generation',
-                            'Focus Mode with background music',
-                            'Unlimited Problems',
+                            'Unlimited Access to Base Features',
                         ]}
                         buttonText="Start for Free"
                         buttonStyle="bg-gray-800 text-white hover:bg-gray-700"
@@ -35,9 +34,8 @@ function Pricing() {
                         price="$10/month"
                         features={[
                             'Unlimited access to all features',
-                            'Advanced AI-generated pseudo-code',
-                            'Realistic interview simulation',
-                            'Priority support',
+                            'Realistic Mock Interview Simulation',
+                            'Live Code Editing With Friends',
                         ]}
                         buttonText="Comming Soon"
                         buttonStyle="bg-purple-600 text-white hover:bg-purple-500"
