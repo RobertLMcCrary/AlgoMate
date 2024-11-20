@@ -80,7 +80,8 @@ export default function ProblemPage() {
                      Problem Context:
                      ${problem?.description}
                      Difficulty: ${problem?.difficulty}
-                     Topics: ${problem?.topics}`,
+                     Topics: ${problem?.topics}
+                     UserCode: ${code}`,
             };
 
             const userMessage = { role: 'user', content: userInput };
@@ -222,6 +223,7 @@ export default function ProblemPage() {
         }
     };
 
+    /*
     // Updated Test Results component
     const TestResults = () => (
         <div className="mt-4 bg-gray-900 p-4 rounded-lg">
@@ -268,10 +270,84 @@ export default function ProblemPage() {
                     </div>
                 </div>
             ))}
-            {/* Show overall result */}
+           
             {results.length > 0 && (
                 <div
                     className={`mt-4 p-3 rounded-lg text-center font-semibold ${
+                        results.every((r) => r.passed)
+                            ? 'bg-green-900/50 text-green-200'
+                            : 'bg-red-900/50 text-red-200'
+                    }`}
+                >
+                    {results.every((r) => r.passed)
+                        ? '🎉 All Test Cases Passed!'
+                        : `${results.filter((r) => r.passed).length}/${
+                              results.length
+                          } Test Cases Passed`}
+                </div>
+            )}
+        </div>
+    );
+    */
+
+    // Updated Test Results component
+    const TestResults = () => (
+        <div
+            className="mt-4 bg-gray-900 p-4 rounded-lg"
+            style={{ maxHeight: '30vh', overflowY: 'auto' }}
+        >
+            <h3 className="text-lg font-semibold text-purple-400 mb-2 sticky top-0 bg-gray-900 py-2">
+                Test Results
+            </h3>
+            <div className="space-y-2">
+                {results.map((result, index) => (
+                    <div
+                        key={index}
+                        className={`p-2 rounded ${
+                            result.passed
+                                ? 'bg-green-900/50 text-green-200'
+                                : 'bg-red-900/50 text-red-200'
+                        }`}
+                    >
+                        <div className="font-semibold flex items-center gap-2">
+                            <span>Test Case {result.testCase}:</span>
+                            {result.passed ? (
+                                <span className="text-green-400">✓ Passed</span>
+                            ) : (
+                                <span className="text-red-400">✗ Failed</span>
+                            )}
+                        </div>
+                        {!result.passed && (
+                            <div className="text-sm mt-1">
+                                {result.error ? (
+                                    <div className="text-red-300">
+                                        Error: {result.error}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div>
+                                            Input:{' '}
+                                            {JSON.stringify(result.input)}
+                                        </div>
+                                        <div>
+                                            Expected:{' '}
+                                            {JSON.stringify(result.expected)}
+                                        </div>
+                                        <div>
+                                            Received:{' '}
+                                            {JSON.stringify(result.received)}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+            {/* Show overall result */}
+            {results.length > 0 && (
+                <div
+                    className={`mt-4 p-3 rounded-lg text-center font-semibold sticky bottom-0 ${
                         results.every((r) => r.passed)
                             ? 'bg-green-900/50 text-green-200'
                             : 'bg-red-900/50 text-red-200'
