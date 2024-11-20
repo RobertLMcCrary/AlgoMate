@@ -1,0 +1,63 @@
+[
+    {
+        "id": "two-sum",
+        "title": "Two Sum",
+        "topics": "Arrays, Hashing",
+        "difficulty": "Easy",
+        "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+        "starterCodes": {
+            "javascript": "function twoSum(nums, target) {\n    // Write your code here\n    \n}",
+            "python": "def twoSum(nums, target):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "nums = [2, 7, 11, 15] \ntarget = 9\n",
+                "output": "[0, 1]"
+            }
+        ],
+        "testCases": [
+            {
+                "input": {
+                    "nums": [2, 7, 11, 15],
+                    "target": 9
+                },
+                "output": [0, 1]
+            },
+            {
+                "input": {
+                    "nums": [3, 2, 4],
+                    "target": 6
+                },
+                "output": [1, 2]
+            }
+        ],
+        "constraints": [
+            "Each input would have exactly one solution.",
+            "You may not use the same element twice."
+        ]
+    },
+    {
+        "id": "reverse-string",
+        "topics" : "Two Pointers, String",
+        "difficulty": "Easy",
+        "title": "Reverse String",
+        "description": "Write a function that reverses a string. The input string is given as an array of characters s.",
+        "starterCodes": {
+            "javascript": "function reverseString(s) {\n    // Write your code here\n    \n}",
+            "python": "def reverseString(s):\n    # Write your code here\n    pass",
+            "cpp": "class Solution {\npublic:\n    void reverseString(vector<char>& s) {\n        // Write your code here\n        \n    }\n};",
+            "java": "class Solution {\n    public void reverseString(char[] s) {\n        // Write your code here\n        \n    }\n}"
+        },
+        "examples": [
+            {
+                "input": "s = ['h','e','l','l','o']",
+                "output": "['o','l','l','e','h']"
+            }
+        ],
+        "constraints": [
+            "You must do this by modifying the input array in-place with O(1) extra memory."
+        ]
+    }
+]

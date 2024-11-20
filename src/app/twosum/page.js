@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
+import { javascript } from '@codemirror/lang-javascript';
+import { EditorView } from 'codemirror';
 
 export default function ProblemPage() {
     const [userInput, setUserInput] = useState('');
@@ -68,12 +70,12 @@ export default function ProblemPage() {
             </div>
 
             {/* Code Editor Section */}
-            <div className="w-1/2 bg-gray-800 p-6">
+            <div className="w-[50vw] bg-gray-800 p-6 h-[100vh]">
                 <h2 className="text-xl font-bold text-purple-400">
                     Code Editor
                 </h2>
                 <textarea
-                    className="w-full h-96 bg-gray-900 text-gray-200 p-4 rounded-lg border border-gray-700 resize-none"
+                    className="w-full h-[50vh] bg-gray-900 text-gray-200 p-4 rounded-lg border border-gray-700 resize-none"
                     placeholder="Write your code here..."
                 ></textarea>
                 <button className="mt-4 bg-purple-700 text-white px-6 py-2 rounded shadow hover:bg-purple-600 transition">
@@ -82,11 +84,11 @@ export default function ProblemPage() {
             </div>
 
             {/* AI Chat Section */}
-            <div className="w-1/4 bg-gray-800 p-6 flex flex-col">
+            <div className="w-1/4 bg-gray-800 p-6 flex flex-col h-[100vh]">
                 <h2 className="text-xl font-bold text-purple-400">
                     AI Assistant
                 </h2>
-                <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
+                <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700 break-words whitespace-pre-wrap">
                     {response ? (
                         <pre className="text-gray-300">{response}</pre>
                     ) : (

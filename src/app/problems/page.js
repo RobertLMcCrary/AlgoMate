@@ -1,44 +1,27 @@
+'use client';
+
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
-
-const problems = [
-    {
-        id: 1,
-        routeName: 'twosum',
-        title: 'Two Sum',
-        difficulty: 'Easy',
-        topic: 'Arrays',
-    },
-    {
-        id: 2,
-        routeTitle: 'binarytreeinordertraversal',
-        title: 'Binary Tree Inorder Traversal',
-        difficulty: 'Medium',
-        topic: 'Trees',
-    },
-    {
-        id: 3,
-        routeTitle: 'longestsubstringwithoutrepeatingcharacters',
-        title: 'Longest Substring Without Repeating Characters',
-        difficulty: 'Hard',
-        topic: 'Strings',
-    },
-];
+import problems from '../../data/problems.json' // Import the JSON file
+import { useEffect } from 'react';
+import Footer from '../components/Footer';
 
 export default function ProblemsPage() {
+
     return (
-        <div className="bg-gray-900 min-h-screen py-8 text-gray-200">
+        <div className="bg-gray-900 h-[100vh] text-gray-200">
             {/* Header */}
             <Navbar />
 
             {/* Filters Section */}
-            <div className="max-w-7xl mx-auto px-4n mt-8">
+            <div className="max-w-7xl mx-auto px-4 mt-8">
                 <div className="flex flex-wrap items-center gap-4">
                     <select className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200">
                         <option value="">All Topics</option>
                         <option value="Arrays">Arrays</option>
-                        <option value="Trees">Trees</option>
-                        <option value="Strings">Strings</option>
+                        <option value="Hashing">Hashing</option>
+                        <option value="Two Pointers">Two Pointers</option>
+                        <option value="String">String</option>
                     </select>
                     <select className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200">
                         <option value="">All Difficulties</option>
@@ -88,11 +71,11 @@ export default function ProblemsPage() {
                                         {problem.difficulty}
                                     </td>
                                     <td className="px-4 py-3">
-                                        {problem.topic}
+                                        {problem.topics}
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <Link
-                                            href={`/twosum`}
+                                            href={`/problems/${problem.id}`}
                                             className="text-purple-400 hover:underline"
                                         >
                                             View Problem
