@@ -1,6 +1,6 @@
 import { HfInference } from '@huggingface/inference';
 
-export const maxDuration = 300; // Set max duration for Vercel serverless function
+export const maxDuration = 30; // Set max duration for Vercel serverless function
 export const dynamic = 'force-dynamic'; // Disable static optimization
 
 export async function POST(req) {
