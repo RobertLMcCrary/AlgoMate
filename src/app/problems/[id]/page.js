@@ -18,8 +18,6 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
-import { cpp } from '@codemirror/lang-cpp';
-import { java } from '@codemirror/lang-java';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorView } from '@codemirror/view';
 import { indentUnit } from '@codemirror/language';
@@ -81,7 +79,7 @@ export default function ProblemPage() {
                      ${problem?.description}
                      Difficulty: ${problem?.difficulty}
                      Topics: ${problem?.topics}
-                     UserCode: ${code}`,
+                     User Code: ${code}`,
             };
 
             const userMessage = { role: 'user', content: userInput };
@@ -126,7 +124,7 @@ export default function ProblemPage() {
         setResults(null);
 
         try {
-            const res = await fetch('/api/submit', {
+            const res = await fetch('/api/code', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -222,73 +220,6 @@ export default function ProblemPage() {
             console.error('Error generating pseudo code:', error);
         }
     };
-
-    /*
-    // Updated Test Results component
-    const TestResults = () => (
-        <div className="mt-4 bg-gray-900 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-purple-400 mb-2">
-                Test Results
-            </h3>
-            {results.map((result, index) => (
-                <div
-                    key={index}
-                    className={`p-2 mb-2 rounded ${
-                        result.passed
-                            ? 'bg-green-900/50 text-green-200'
-                            : 'bg-red-900/50 text-red-200'
-                    }`}
-                >
-                    <div className="font-semibold flex items-center gap-2">
-                        <span>Test Case {result.testCase}:</span>
-                        {result.passed ? (
-                            <span className="text-green-400">✓ Passed</span>
-                        ) : (
-                            <span className="text-red-400">✗ Failed</span>
-                        )}
-                    </div>
-                    <div className="text-sm mt-1">
-                        {result.error ? (
-                            <div className="text-red-300">
-                                Error: {result.error}
-                            </div>
-                        ) : (
-                            <>
-                                <div>
-                                    Input: nums ={' '}
-                                    {JSON.stringify(result.input.nums)}, target
-                                    = {result.input.target}
-                                </div>
-                                <div>
-                                    Expected: {JSON.stringify(result.expected)}
-                                </div>
-                                <div>
-                                    Received: {JSON.stringify(result.received)}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            ))}
-           
-            {results.length > 0 && (
-                <div
-                    className={`mt-4 p-3 rounded-lg text-center font-semibold ${
-                        results.every((r) => r.passed)
-                            ? 'bg-green-900/50 text-green-200'
-                            : 'bg-red-900/50 text-red-200'
-                    }`}
-                >
-                    {results.every((r) => r.passed)
-                        ? '🎉 All Test Cases Passed!'
-                        : `${results.filter((r) => r.passed).length}/${
-                              results.length
-                          } Test Cases Passed`}
-                </div>
-            )}
-        </div>
-    );
-    */
 
     // Updated Test Results component
     const TestResults = () => (

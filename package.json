@@ -19,6 +19,7 @@
     "@prisma/client": "^5.22.0",
     "@uiw/codemirror-theme-vscode": "^4.23.6",
     "@uiw/react-codemirror": "^4.23.6",
+    "@vercel/analytics": "^1.4.1",
     "codemirror": "^6.0.1",
     "huggingface": "^1.4.0",
     "monaco-editor": "^0.52.0",
