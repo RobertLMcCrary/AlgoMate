@@ -12,11 +12,16 @@ function Dashboard() {
                 {/* Featured Problem of the Day */}
                 <section className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-2xl font-bold">Solve Your First Problem</h3>
-                        <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Easy</span>
+                        <h3 className="text-2xl font-bold">
+                            Solve Your First Problem
+                        </h3>
+                        <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
+                            Easy
+                        </span>
                     </div>
                     <p className="text-gray-300 mb-4">
-                        Two Sum: Given an array of integers nums and an integer target, return indices of the two numbers...
+                        Two Sum: Given an array of integers nums and an integer
+                        target, return indices of the two numbers...
                     </p>
                     <Link href="/problems/two-sum">
                         <span className="text-green-400 hover:text-green-300 font-semibold">
@@ -62,23 +67,38 @@ function Dashboard() {
 
                 {/* Community Section */}
                 <section className="mt-8">
-                    <h3 className="text-3xl font-bold mb-6">Community Updates</h3>
+                    <h3 className="text-3xl font-bold mb-6">
+                        Community Updates
+                    </h3>
                     <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
                         <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-xl font-bold">We Are Open Source!</h4>
-                            <span className="bg-indigo-600 px-3 py-1 rounded-full text-sm">New</span>
+                            <h4 className="text-xl font-bold">
+                                We Are Open Source!
+                            </h4>
+                            <span className="bg-indigo-600 px-3 py-1 rounded-full text-sm">
+                                New
+                            </span>
                         </div>
                         <p className="text-gray-300 mb-4">
-                            Connect with fellow developers, share solutions, and get help from the community.
+                            Connect with fellow developers, share solutions, and
+                            get help from the community.
                         </p>
-                        <a
-                            href="https://github.com/RobertLMcCrary/PseudoAI.git"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-indigo-500 transition"
-                        >
-                            Contribute
-                        </a>
+                        <div className="flex gap-[10px] items-center">
+                            <a
+                                href="https://github.com/RobertLMcCrary/PseudoAI.git"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-indigo-500 transition"
+                            >
+                                Contribute
+                            </a>
+                            <Link
+                                className="text-blue-500 hover:underline"
+                                href="/community"
+                            >
+                                Check out our Blog.
+                            </Link>
+                        </div>
                     </div>
                 </section>
             </main>

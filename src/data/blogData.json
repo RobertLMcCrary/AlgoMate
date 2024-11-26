@@ -1,0 +1,18 @@
+[
+    {
+        "id": "1",
+        "title": "Welcome to Our Community!",
+        "date": "2024-11-01",
+        "author": "Admin",
+        "excerpt": "Discover how our community empowers you to ace coding interviews.",
+        "content": "Welcome to our community! We're excited to have you on board. This platform is designed to help you tackle coding interviews with confidence and finesse."
+    },
+    {
+        "id": "2",
+        "title": "New Features: PseudoAI Pro",
+        "date": "2024-11-10",
+        "author": "Dev Team",
+        "excerpt": "Get ready to explore PseudoAI Pro features like mock interviews and live collaboration!",
+        "content": "PseudoAI Pro is here! With video calling, real-time chat, and AI feedback, this is your go-to solution for mastering coding interviews."
+    }
+]
