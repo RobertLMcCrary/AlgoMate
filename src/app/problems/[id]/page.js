@@ -1,8 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import problems from '../../../data/problems.json';
+import { useParams, useRouter } from 'next/navigation';
 
 //react markdown
 import ReactMarkdown from 'react-markdown';
@@ -18,6 +17,8 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
+import { java } from '@codemirror/lang-java';
+import { cpp } from '@codemirror/lang-cpp';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorView } from '@codemirror/view';
 import { indentUnit } from '@codemirror/language';
@@ -37,13 +38,12 @@ export default function ProblemPage() {
     const [results, setResults] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState('javascript');
 
-    //popups
-    const [showPopup, setShowPopup] = useState(false);
-
     //language map for selecting language
     const languageMap = {
         javascript: javascript({ jsx: true }),
-        python: python(),
+        //python: python(),
+        //java: java(),
+        //cpp: cpp(),
     };
 
     useEffect(() => {
@@ -52,11 +52,20 @@ export default function ProblemPage() {
         }
     }, [problem, selectedLanguage]);
 
-    //fetch problems
+    //fetch problems from mongodb
     useEffect(() => {
         if (params.id) {
-            const problemData = problems.find((p) => p.id === params.id);
-            setProblem(problemData);
+            console.log('Fetching problem with ID:', params.id);
+            fetch(`/api/problems/${params.id}`)
+                .then((res) => {
+                    console.log('Response status:', res.status);
+                    return res.json();
+                })
+                .then((data) => {
+                    console.log('Received data:', data);
+                    setProblem(data);
+                })
+                .catch((error) => console.error('Error:', error));
         }
     }, [params.id]);
 
@@ -79,7 +88,8 @@ export default function ProblemPage() {
                      ${problem?.description}
                      Difficulty: ${problem?.difficulty}
                      Topics: ${problem?.topics}
-                     User Code: ${code}`,
+                     User Code: ${code}
+                     Language: ${selectedLanguage}`,
             };
 
             const userMessage = { role: 'user', content: userInput };
@@ -181,7 +191,8 @@ export default function ProblemPage() {
                          Problem Context:
                          ${problem?.description}
                          Difficulty: ${problem?.difficulty}
-                         Topics: ${problem?.topics}`,
+                         Topics: ${problem?.topics}
+                         Language: ${selectedLanguage}`,
             };
 
             const userMessage = {
@@ -221,79 +232,6 @@ export default function ProblemPage() {
         }
     };
 
-    // Updated Test Results component
-    const TestResults = () => (
-        <div
-            className="mt-4 bg-gray-900 p-4 rounded-lg"
-            style={{ maxHeight: '30vh', overflowY: 'auto' }}
-        >
-            <h3 className="text-lg font-semibold text-purple-400 mb-2 sticky top-0 bg-gray-900 py-2">
-                Test Results
-            </h3>
-            <div className="space-y-2">
-                {results.map((result, index) => (
-                    <div
-                        key={index}
-                        className={`p-2 rounded ${
-                            result.passed
-                                ? 'bg-green-900/50 text-green-200'
-                                : 'bg-red-900/50 text-red-200'
-                        }`}
-                    >
-                        <div className="font-semibold flex items-center gap-2">
-                            <span>Test Case {result.testCase}:</span>
-                            {result.passed ? (
-                                <span className="text-green-400">✓ Passed</span>
-                            ) : (
-                                <span className="text-red-400">✗ Failed</span>
-                            )}
-                        </div>
-                        {!result.passed && (
-                            <div className="text-sm mt-1">
-                                {result.error ? (
-                                    <div className="text-red-300">
-                                        Error: {result.error}
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div>
-                                            Input:{' '}
-                                            {JSON.stringify(result.input)}
-                                        </div>
-                                        <div>
-                                            Expected:{' '}
-                                            {JSON.stringify(result.expected)}
-                                        </div>
-                                        <div>
-                                            Received:{' '}
-                                            {JSON.stringify(result.received)}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-            {/* Show overall result */}
-            {results.length > 0 && (
-                <div
-                    className={`mt-4 p-3 rounded-lg text-center font-semibold sticky bottom-0 ${
-                        results.every((r) => r.passed)
-                            ? 'bg-green-900/50 text-green-200'
-                            : 'bg-red-900/50 text-red-200'
-                    }`}
-                >
-                    {results.every((r) => r.passed)
-                        ? '🎉 All Test Cases Passed!'
-                        : `${results.filter((r) => r.passed).length}/${
-                              results.length
-                          } Test Cases Passed`}
-                </div>
-            )}
-        </div>
-    );
-
     return (
         <PanelGroup direction="horizontal" className="flex h-screen">
             {/* Problem Section */}
@@ -322,12 +260,12 @@ export default function ProblemPage() {
                         <p className="mt-4">{problem.description}</p>
                         <h3 className="mt-6 font-semibold">Constraints:</h3>
                         <ul className="list-disc list-inside mt-2">
-                            {problem.constraints.map((constraint, idx) => (
+                            {problem?.constraints?.map((constraint, idx) => (
                                 <li key={idx}>{constraint}</li>
                             ))}
                         </ul>
                         <h3 className="mt-6 font-semibold">Examples:</h3>
-                        {problem.examples.map((example, idx) => (
+                        {problem?.examples?.map((example, idx) => (
                             <pre
                                 key={idx}
                                 className="bg-gray-700 p-4 rounded mt-2 whitespace-pre-wrap break-words max-w-full overflow-x-hidden text-left"
@@ -362,7 +300,12 @@ export default function ProblemPage() {
                                  focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="javascript">JavaScript</option>
-                        <option value="python">Python</option>
+                        {/*
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        */}
                     </select>
                 </div>
                 <CodeMirror
@@ -457,7 +400,7 @@ export default function ProblemPage() {
 
                 {/* Test Results */}
                 {results && (
-                    <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
+                    <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[37vh]">
                         <h3 className="text-lg font-semibold text-purple-400 mb-2">
                             Test Results
                         </h3>
@@ -508,65 +451,6 @@ export default function ProblemPage() {
                                                         result.received
                                                     )}
                                                 </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                        {/* Overall Results Summary */}
-                        {results.length > 0 && (
-                            <div
-                                className={`mt-4 p-3 rounded-lg text-center font-semibold ${
-                                    results.every((r) => r.passed)
-                                        ? 'bg-green-900/50 text-green-200'
-                                        : 'bg-red-900/50 text-red-200'
-                                }`}
-                            >
-                                {results.every((r) => r.passed)
-                                    ? '🎉 All Test Cases Passed!'
-                                    : `${
-                                          results.filter((r) => r.passed).length
-                                      }/${results.length} Test Cases Passed`}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Test Results */}
-                {results && (
-                    <div className="mt-4 bg-gray-900 p-4 rounded-lg">
-                        <h3 className="text-lg font-semibold text-purple-400 mb-2">
-                            Test Results
-                        </h3>
-                        {results.map((result, index) => (
-                            <div
-                                key={index}
-                                className={`p-2 mb-2 rounded ${
-                                    result.passed
-                                        ? 'bg-green-900/50 text-green-200'
-                                        : 'bg-red-900/50 text-red-200'
-                                }`}
-                            >
-                                <div className="font-semibold">
-                                    Test Case {result.testCase}:{' '}
-                                    {result.passed ? 'Passed' : 'Failed'}
-                                </div>
-                                {!result.passed && (
-                                    <div className="text-sm mt-1">
-                                        {result.error ? (
-                                            <>Error: {result.error}</>
-                                        ) : (
-                                            <>
-                                                Expected:{' '}
-                                                {JSON.stringify(
-                                                    result.expected
-                                                )}
-                                                <br />
-                                                Received:{' '}
-                                                {JSON.stringify(
-                                                    result.received
-                                                )}
                                             </>
                                         )}
                                     </div>

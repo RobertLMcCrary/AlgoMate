@@ -2,7 +2,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { SignUpButton } from '@clerk/nextjs';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
 
 function Pricing() {
     return (
@@ -71,11 +71,11 @@ function PricingCard({
                 ))}
             </ul>
             <a href={link}>
-                <SignUpButton
+                <SignInButton
                     className={`px-6 py-3 rounded-full font-semibold transition ${buttonStyle}`}
                 >
                     {buttonText}
-                </SignUpButton>
+                </SignInButton>
             </a>
         </div>
     );

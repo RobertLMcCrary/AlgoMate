@@ -1,49 +1,68 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
-import problems from '../../data/problems.json';
-import { useEffect, useState, useCallback } from 'react';
 import Footer from '../components/Footer';
 
 export default function ProblemsPage() {
-    const [filteredProblems, setFilteredProblems] = useState(problems);
+    const [problems, setProblems] = useState([]);
+    const [filteredProblems, setFilteredProblems] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState('');
     const [selectedDifficulty, setSelectedDifficulty] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const allTopics = [...new Set(problems.flatMap(problem =>
-        problem.topics.split(', ')
-    ))].sort();
+    // Fetch problems from the API
+    useEffect(() => {
+        const fetchProblems = async () => {
+            try {
+                const response = await fetch('/api/problems');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch problems');
+                }
+                const data = await response.json();
+                console.log('Fetched problems:', data);
+                setProblems(data);
+                setFilteredProblems(data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
-    // Apply filters and search
+        fetchProblems();
+    }, []);
+
+    const allTopics = [
+        ...new Set(problems.flatMap((problem) => problem.topics.split(', '))),
+    ].sort();
+
     const applyFilters = useCallback(() => {
         let result = [...problems];
 
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
-            result = result.filter(problem =>
-                problem.title.toLowerCase().includes(query) ||
-                problem.topics.toLowerCase().includes(query)
+            result = result.filter(
+                (problem) =>
+                    problem.title.toLowerCase().includes(query) ||
+                    problem.topics.toLowerCase().includes(query)
             );
         }
 
         if (selectedTopic) {
-            result = result.filter(problem =>
+            result = result.filter((problem) =>
                 problem.topics.includes(selectedTopic)
             );
         }
 
         if (selectedDifficulty) {
-            result = result.filter(problem =>
-                problem.difficulty === selectedDifficulty
+            result = result.filter(
+                (problem) => problem.difficulty === selectedDifficulty
             );
         }
 
         setFilteredProblems(result);
-    }, [searchQuery, selectedTopic, selectedDifficulty])
+    }, [problems, searchQuery, selectedTopic, selectedDifficulty]);
 
-    // Reset all filters and search
     const resetFilters = () => {
         setSelectedTopic('');
         setSelectedDifficulty('');
@@ -53,7 +72,7 @@ export default function ProblemsPage() {
 
     useEffect(() => {
         applyFilters();
-    }, [selectedTopic, selectedDifficulty, searchQuery, applyFilters])
+    }, [selectedTopic, selectedDifficulty, searchQuery, applyFilters]);
 
     return (
         <div className="bg-gray-900 min-h-screen text-gray-200">
@@ -61,7 +80,6 @@ export default function ProblemsPage() {
 
             {/* Search and Filters Section */}
             <div className="max-w-7xl mx-auto px-4 mt-8">
-                {/* Search Bar */}
                 <div className="mb-4">
                     <input
                         type="text"
@@ -72,22 +90,21 @@ export default function ProblemsPage() {
                     />
                 </div>
 
-                {/* Filters */}
                 <div className="flex flex-wrap items-center gap-4">
-                    <select 
+                    <select
                         className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200"
                         value={selectedTopic}
                         onChange={(e) => setSelectedTopic(e.target.value)}
                     >
                         <option value="">All Topics</option>
-                        {allTopics.map(topic => (
+                        {allTopics.map((topic) => (
                             <option key={topic} value={topic}>
                                 {topic}
                             </option>
                         ))}
                     </select>
 
-                    <select 
+                    <select
                         className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200"
                         value={selectedDifficulty}
                         onChange={(e) => setSelectedDifficulty(e.target.value)}
@@ -98,7 +115,7 @@ export default function ProblemsPage() {
                         <option value="Hard">Hard</option>
                     </select>
 
-                    <button 
+                    <button
                         onClick={resetFilters}
                         className="bg-gray-700 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition"
                     >
@@ -106,12 +123,12 @@ export default function ProblemsPage() {
                     </button>
 
                     <span className="ml-auto text-gray-400">
-                        Showing {filteredProblems.length} of {problems.length} problems
+                        Showing {filteredProblems.length} of {problems.length}{' '}
+                        problems
                     </span>
                 </div>
             </div>
 
-            {/* Problems List */}
             <div className="max-w-7xl mx-auto px-4 mt-8">
                 <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden">
                     <table className="w-full text-left">
@@ -120,7 +137,9 @@ export default function ProblemsPage() {
                                 <th className="px-4 py-3">Title</th>
                                 <th className="px-4 py-3">Difficulty</th>
                                 <th className="px-4 py-3">Topic</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
+                                <th className="px-4 py-3 text-right">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,13 +152,16 @@ export default function ProblemsPage() {
                                         <td className="px-4 py-3">
                                             {problem.title}
                                         </td>
-                                        <td className={`px-4 py-3 ${
-                                            problem.difficulty === 'Easy'
-                                                ? 'text-green-400'
-                                                : problem.difficulty === 'Medium'
-                                                ? 'text-yellow-400'
-                                                : 'text-red-400'
-                                        }`}>
+                                        <td
+                                            className={`px-4 py-3 ${
+                                                problem.difficulty === 'Easy'
+                                                    ? 'text-green-400'
+                                                    : problem.difficulty ===
+                                                      'Medium'
+                                                    ? 'text-yellow-400'
+                                                    : 'text-red-400'
+                                            }`}
+                                        >
                                             {problem.difficulty}
                                         </td>
                                         <td className="px-4 py-3">
@@ -157,8 +179,12 @@ export default function ProblemsPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="px-4 py-8 text-center text-gray-400">
-                                        No problems found matching the selected filters.
+                                    <td
+                                        colSpan="4"
+                                        className="px-4 py-8 text-center text-gray-400"
+                                    >
+                                        No problems found matching the selected
+                                        filters.
                                     </td>
                                 </tr>
                             )}
