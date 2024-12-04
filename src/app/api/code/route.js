@@ -46,6 +46,20 @@ export async function POST(req) {
                             return reverseString(s);
                         `;
                         break;
+                    case 'palindrome-number':
+                        functionCall = `
+                        ${code}
+                        const x = input.x;
+                        return isPalindrome(x);
+                        `;
+                        break;
+                    case 'roman-to-integer':
+                        functionCall = `
+                        ${code}
+                        const s = input.s;
+                        return romanToInt(s);
+                        `;
+                        break;
                     default:
                         functionCall = `
                             ${code}

@@ -180,6 +180,7 @@ export default function ProblemPage() {
 
     //generating pseudo code in the editor
     const generatePseudoCode = async () => {
+        setLoading(true);
         try {
             // Create a system message specifically for pseudo code generation
             const systemMessage = {
@@ -230,6 +231,7 @@ export default function ProblemPage() {
         } catch (error) {
             console.error('Error generating pseudo code:', error);
         }
+        setLoading(false);
     };
 
     return (
@@ -385,7 +387,7 @@ export default function ProblemPage() {
                         onClick={generatePseudoCode}
                         className="px-4 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition text-sm font-medium"
                     >
-                        Generate Pseudo Code
+                        {loading ? 'Thinking...' : 'Generate Pseudo Code'}
                     </button>
                     <button
                         onClick={() =>

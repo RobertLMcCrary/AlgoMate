@@ -3,7 +3,7 @@
         "id": "two-sum",
         "title": "Two Sum",
         "topics": "Arrays, Hashing",
-        "difficulty": "Easy",
+       "difficulty": "Easy",
         "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
         "starterCodes": {
             "javascript": "function twoSum(nums, target) {\n    // Write your code here\n    \n}",
