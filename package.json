@@ -36,7 +36,8 @@
     "react-resizable-panels": "^2.1.7",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.0",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "svix": "^1.42.0"
   },
   "devDependencies": {
     "eslint": "^8",
