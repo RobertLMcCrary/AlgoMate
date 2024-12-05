@@ -49,6 +49,7 @@ export async function POST(req) {
             { upsert: true }
         );
 
+        //console.log('MongoDB operation result:', result);
         console.log('MongoDB operation result:', result);
 
         return new Response('Webhook received', { status: 200 });
