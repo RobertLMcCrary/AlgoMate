@@ -24,7 +24,7 @@ export async function POST(req) {
         return testCases.map((testCase, index) => {
             try {
                 const sandbox = {
-                    console: { log: () => { } },
+                    console: { log: () => {} },
                     JSON: JSON,
                 };
 

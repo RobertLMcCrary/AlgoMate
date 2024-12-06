@@ -69,6 +69,7 @@ export default function ProblemPage() {
         }
     }, [params.id]);
 
+    //user input for chatbot
     const handleUserInput = async (e) => {
         e.preventDefault();
         if (userInput.trim()) {
@@ -93,10 +94,7 @@ export default function ProblemPage() {
             };
 
             const userMessage = { role: 'user', content: userInput };
-            // Include both system message and user message
-            const updatedMessages = [...messages, systemMessage, userMessage];
-
-            setMessages(updatedMessages);
+            setMessages((prevMessages) => [...prevMessages, userMessage]);
             setUserInput('');
             setLoading(true);
 
@@ -106,7 +104,9 @@ export default function ProblemPage() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ messages: updatedMessages }),
+                    body: JSON.stringify({
+                        messages: [...messages, systemMessage, userMessage],
+                    }),
                 });
 
                 if (!res.ok) {
@@ -115,6 +115,11 @@ export default function ProblemPage() {
 
                 const data = await res.json();
                 if (data && data.output) {
+                    const aiMessage = {
+                        role: 'assistant',
+                        content: data.output,
+                    };
+                    setMessages((prevMessages) => [...prevMessages, aiMessage]);
                     setResponse(data.output);
                 } else {
                     throw new Error('Received an empty or invalid response');
@@ -129,6 +134,7 @@ export default function ProblemPage() {
     };
 
     //running code in the code editor
+    //need to add user progress tracking
     const runCode = async () => {
         setIsRunning(true);
         setResults(null);
@@ -475,43 +481,70 @@ export default function ProblemPage() {
                     AI Assistant
                 </h2>
                 <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
-                    {response ? (
-                        <ReactMarkdown
-                            className="text-gray-300 prose prose-invert max-w-none"
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeKatex]}
-                            components={{
-                                code({
-                                    node,
-                                    inline,
-                                    className,
-                                    children,
-                                    ...props
-                                }) {
-                                    return (
-                                        <code
-                                            className={`${className} bg-gray-800 rounded px-1`}
-                                            {...props}
-                                        >
-                                            {children}
-                                        </code>
-                                    );
-                                },
-                                pre({ node, children, ...props }) {
-                                    return (
-                                        <pre
-                                            className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
-                                            {...props}
-                                        >
-                                            {children}
-                                        </pre>
-                                    );
-                                },
-                            }}
-                        >
-                            {response}
-                        </ReactMarkdown>
-                    ) : (
+                    {messages.map((message, index) =>
+                        message.role === 'user' ||
+                        message.role === 'assistant' ? (
+                            <div
+                                key={index}
+                                className={`mb-4 ${
+                                    message.role === 'user'
+                                        ? 'text-blue-400'
+                                        : 'text-gray-300'
+                                }`}
+                            >
+                                <div className="font-bold mb-1">
+                                    {message.role === 'user'
+                                        ? 'You:'
+                                        : 'AI Assistant:'}
+                                </div>
+                                <ReactMarkdown
+                                    className="prose prose-invert max-w-none"
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeKatex]}
+                                    components={{
+                                        code({
+                                            node,
+                                            inline,
+                                            className,
+                                            children,
+                                            ...props
+                                        }) {
+                                            return (
+                                                <code
+                                                    className={`${className} bg-gray-800 rounded px-1`}
+                                                    {...props}
+                                                >
+                                                    {children}
+                                                </code>
+                                            );
+                                        },
+                                        pre({ node, children, ...props }) {
+                                            return (
+                                                <pre
+                                                    className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
+                                                    {...props}
+                                                >
+                                                    {children}
+                                                </pre>
+                                            );
+                                        },
+                                    }}
+                                >
+                                    {message.content}
+                                </ReactMarkdown>
+                            </div>
+                        ) : null
+                    )}
+                    {loading && (
+                        <div className="text-gray-300 flex items-center gap-2">
+                            <span className="font-bold">AI Assistant:</span>
+                            <div className="flex items-center">
+                                <span>Thinking</span>
+                                <span className="ml-1 animate-pulse">...</span>
+                            </div>
+                        </div>
+                    )}
+                    {messages.length === 0 && (
                         <p className="text-gray-400">
                             Ask for hints or pseudocode here.
                         </p>
