@@ -41,9 +41,9 @@ export default function ProblemPage() {
     //language map for selecting language
     const languageMap = {
         javascript: javascript({ jsx: true }),
-        //python: python(),
-        //java: java(),
-        //cpp: cpp(),
+        python: python(),
+        java: java(),
+        cpp: cpp(),
     };
 
     useEffect(() => {
@@ -140,6 +140,44 @@ export default function ProblemPage() {
         setResults(null);
 
         try {
+            console.log('Sending code to API:', code);
+            const res = await fetch('/api/code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    code,
+                    language: selectedLanguage,
+                    problemId: problem.id,
+                    testCases: problem.testCases,
+                }),
+            });
+
+            const data = await res.json();
+            console.log('Received response from API:', data);
+
+            setResults(data.results);
+        } catch (error) {
+            console.error('Frontend error:', error);
+            setResults([
+                {
+                    testCase: 'Error',
+                    passed: false,
+                    error: 'Failed to run code. Please try again.',
+                },
+            ]);
+        } finally {
+            setIsRunning(false);
+        }
+    };
+
+    /*
+    const runCode = async () => {
+        setIsRunning(true);
+        setResults(null);
+
+        try {
             const res = await fetch('/api/code', {
                 method: 'POST',
                 headers: {
@@ -183,6 +221,7 @@ export default function ProblemPage() {
             setIsRunning(false);
         }
     };
+    */
 
     //generating pseudo code in the editor
     const generatePseudoCode = async () => {
@@ -308,12 +347,9 @@ export default function ProblemPage() {
                                  focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="javascript">JavaScript</option>
-                        {/*
-                            <option value="javascript">JavaScript</option>
-                            <option value="python">Python</option>
-                            <option value="java">Java</option>
-                            <option value="cpp">C++</option>
-                        */}
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
                     </select>
                 </div>
                 <CodeMirror
