@@ -1,6 +1,5 @@
 const JUDGE0_API = 'https://judge0-ce.p.rapidapi.com';
 
-// Language IDs for Judge0
 const languageIds = {
     python: 71,
     cpp: 54,
@@ -15,7 +14,6 @@ function runJavaScriptLocally(code, testCases, problemId) {
                 JSON: JSON,
             };
 
-            // Create dynamic function call based on problem ID
             let functionCall;
             switch (problemId) {
                 case 'two-sum':
@@ -77,6 +75,132 @@ function runJavaScriptLocally(code, testCases, problemId) {
         }
     });
 }
+
+async function runWithJudge0(code, language, testCases) {
+    const results = [];
+
+    for (const testCase of testCases) {
+        try {
+            if (results.length > 0) {
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
+
+            const processedCode = `
+import json
+import sys
+
+def main():
+    try:
+        input_data = json.loads(input())
+        result = None
+        
+        if 'nums' in input_data:
+            result = twoSum(input_data['nums'], input_data['target'])
+        elif 'x' in input_data:
+            result = isPalindrome(input_data['x'])
+        elif 's' in input_data:
+            if isinstance(input_data['s'], list):
+                s = input_data['s']
+                result = reverseString(s)
+            else:
+                result = romanToInt(input_data['s'])
+        
+        print(json.dumps(result))
+    except Exception as e:
+        print(f"Error: {str(e)}", file=sys.stderr)
+        raise
+
+${code}
+
+if __name__ == "__main__":
+    main()`;
+
+            const submitResponse = await fetch(
+                `${JUDGE0_API}/submissions?base64_encoded=true&wait=false&fields=*`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+                    },
+                    body: JSON.stringify({
+                        language_id: languageIds[language],
+                        source_code: processedCode,
+                        stdin: JSON.stringify(testCase.input),
+                    }),
+                }
+            );
+
+            if (submitResponse.status === 429) {
+                results.push({
+                    testCase: results.length + 1,
+                    passed: false,
+                    error: 'Rate limit exceeded. Please wait a moment and try again.',
+                    input: testCase.input,
+                    expected: testCase.output,
+                    received: null,
+                });
+                continue;
+            }
+
+            const submitData = await submitResponse.json();
+            if (!submitData.token) {
+                throw new Error('No token received from Judge0');
+            }
+
+            const result = submitData;
+            let receivedOutput = null;
+
+            if (result.stdout) {
+                try {
+                    receivedOutput = JSON.parse(result.stdout.trim());
+                } catch {
+                    receivedOutput = result.stdout.trim();
+                }
+            }
+
+            results.push({
+                testCase: results.length + 1,
+                passed:
+                    JSON.stringify(receivedOutput) ===
+                    JSON.stringify(testCase.output),
+                input: testCase.input,
+                expected: testCase.output,
+                received: receivedOutput,
+                error: result.stderr || null,
+            });
+        } catch (error) {
+            results.push({
+                testCase: results.length + 1,
+                passed: false,
+                error: error.message || 'Execution error',
+                input: testCase.input,
+                expected: testCase.output,
+                received: null,
+            });
+        }
+    }
+
+    return results;
+}
+
+export async function POST(req) {
+    const { code, language, problemId, testCases } = await req.json();
+
+    if (language === 'javascript') {
+        return new Response(
+            JSON.stringify({
+                results: runJavaScriptLocally(code, testCases, problemId),
+            }),
+            { status: 200 }
+        );
+    } else {
+        const results = await runWithJudge0(code, language, testCases);
+        return new Response(JSON.stringify({ results }), { status: 200 });
+    }
+}
+
 /*
 async function runWithJudge0(code, language, testCases) {
     const results = [];
@@ -189,19 +313,3 @@ if __name__ == "__main__":
     return results;
 }
 */
-
-export async function POST(req) {
-    const { code, language, problemId, testCases } = await req.json();
-
-    if (language === 'javascript') {
-        return new Response(
-            JSON.stringify({
-                results: runJavaScriptLocally(code, testCases, problemId),
-            }),
-            { status: 200 }
-        );
-    } else {
-        const results = await runWithJudge0(code, language, testCases);
-        return new Response(JSON.stringify({ results }), { status: 200 });
-    }
-}

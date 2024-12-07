@@ -347,9 +347,6 @@ export default function ProblemPage() {
                                  focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="javascript">JavaScript</option>
-                        <option value="python">Python</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
                     </select>
                 </div>
                 <CodeMirror
