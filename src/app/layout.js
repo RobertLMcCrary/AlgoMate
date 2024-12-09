@@ -37,6 +37,10 @@ export default function RootLayout({ children }) {
                 >
                     {children}
                     <Analytics />
+                    <script
+                        src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"
+                        async
+                    ></script>
                 </body>
             </html>
         </ClerkProvider>
