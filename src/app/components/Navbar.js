@@ -26,7 +26,7 @@ function Navbar() {
                     <div className="space-x-6 flex items-center">
                         <Link href="/">
                             <span className="text-white text-lg font-medium hover:text-gray-300 transition">
-                                Home
+                                Dashboard
                             </span>
                         </Link>
                         <Link href="/problems">
@@ -44,9 +44,7 @@ function Navbar() {
                                 Contact
                             </span>
                         </Link>
-                        <Link href="/pricing">
-                            <UserButton />
-                        </Link>
+                        <UserButton />
                     </div>
                 </SignedIn>
 

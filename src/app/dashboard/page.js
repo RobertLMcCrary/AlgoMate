@@ -51,7 +51,7 @@ function Dashboard() {
                 {/* Quick Access Section */}
                 <section>
                     <h3 className="text-3xl font-bold mb-6">Quick Access</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
                         <QuickAccessCard
                             title="Practice Problems"
                             description="Browse our collection of coding challenges."
@@ -61,6 +61,11 @@ function Dashboard() {
                             title="Interview Prep"
                             description="Get ready for technical interviews."
                             href="/problems"
+                        />
+                        <QuickAccessCard
+                            title="Profile Stats"
+                            description="Track your progress and see your achievements."
+                            href="/stats"
                         />
                     </div>
                 </section>
