@@ -1,5 +1,5 @@
 import { javascriptFunctionCalls } from '@/utils/codeExecutionUtils';
-import { updateUserProgress } from '@/lib/userProgress';
+import { updateUserProgress } from '../../../../lib/userProgress';
 import { auth } from '@clerk/nextjs';
 
 //we not using judge0 api anymore because it is lowkey too expensive
