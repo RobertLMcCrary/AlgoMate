@@ -107,6 +107,7 @@ export default function ProblemPage() {
                      ${problem?.description}
                      Difficulty: ${problem?.difficulty}
                      Topics: ${problem?.topics}
+                     Starter Code: ${problem?.starterCodes[selectedLanguage]}
                      User Code: ${code}
                      Language: ${selectedLanguage}`,
             };

@@ -1,4 +1,6 @@
 import { javascriptFunctionCalls } from '@/utils/codeExecutionUtils';
+import { updateUserProgress } from '@/lib/userProgress';
+import { auth } from '@clerk/nextjs';
 
 //we not using judge0 api anymore because it is lowkey too expensive
 //keep this code snippet just in case though
@@ -45,15 +47,20 @@ function runJavaScriptLocally(code, testCases, problemId) {
 //post request for running the code
 export async function POST(req) {
     const { code, language, problemId, testCases } = await req.json();
+    const { userId } = auth();
 
     try {
         if (language === 'javascript') {
-            return new Response(
-                JSON.stringify({
-                    results: runJavaScriptLocally(code, testCases, problemId),
-                }),
-                { status: 200 }
-            );
+            const results = runJavaScriptLocally(code, testCases, problemId);
+
+            // Check if all test cases passed
+            const allTestsPassed = results.every((result) => result.passed);
+
+            if (allTestsPassed && userId) {
+                await updateUserProgress(userId, problemId, problem.difficulty);
+            }
+
+            return new Response(JSON.stringify({ results }), { status: 200 });
         }
     } catch (error) {
         return new Response(

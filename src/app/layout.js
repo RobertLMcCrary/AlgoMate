@@ -10,6 +10,7 @@ import {
     SignedOut,
     UserButton,
 } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 
 const geistSans = localFont({
     src: './fonts/GeistVF.woff',
