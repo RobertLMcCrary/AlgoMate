@@ -1,45 +1,56 @@
-# Project Structure
+# PseudoAI - AI-Powered Technical Interview Platform
 
-## Pages
-Located in `src/app/`:
+## Project Overview
+PseudoAI is a modern technical interview preparation platform that combines AI assistance with interactive coding challenges and community features.
 
-### Main Pages
-- `src/app/page.js` - Home page with features and quick access
-- `/pricing` - Pricing page with Free and Pro plan options
-- `/problems` - Problems list page with interactive filters
-- `/problems/[id]` - Dynamic problem page for coding challenges
-
-### Components
-Located in various page files:
-- `FeatureCard` - Displays features with icon and description
-- `QuickAccessCard` - Clickable card with title and description
-- `StatCard` - Displays statistics with title, value, and description
-- `PricingCard` - Shows pricing plan details
-
-## API Endpoints
-Located in `src/app/api/`:
+## Core Features
+### AI Assistant
+- Location: `src/app/api/chat/route.js`
+- Uses Hugging Face's Qwen model for intelligent guidance
+- Provides hints and explanations without direct solutions
+- Supports markdown formatting for code examples
 
 ### Code Execution
-- `POST /api/submit`
-  - Handles code submission and testing
-  - Uses Judge0 API for code execution
-  - Supports JavaScript and Python
-  - Rate limited, requires RAPIDAPI_KEY
+- Location: `src/app/api/code/route.js`
+- Supports JavaScript and Python execution
+- Real-time test case validation
+- Progress tracking integration
 
-### AI Assistant
-- `POST /api/chat`
-  - Provides AI assistance using Hugging Face's model
-  - Requires HUGGINGFACE_API_KEY
-  - Max duration: 30 seconds
-  - Force dynamic routing enabled
+### Progress Tracking
+- Location: `src/app/stats/page.js`
+- Tracks solved problems by difficulty
+- Maintains user statistics
+- Features competitive leaderboard
+- MongoDB integration for data persistence
 
-## Path Configuration
-The `jsconfig.json` shows that source files are aliased with `@/`:
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
+### User Authentication
+- Uses Clerk for authentication
+- Webhook integration: `src/app/api/webhooks/clerk/route.js`
+- User model: `lib/models/User.js`
+
+## Project Structure
+
+### Frontend Pages
+- `/` - Dashboard with progress overview
+- `/problems` - Problem listing
+- `/problems/[id]` - Interactive coding environment
+- `/stats` - Progress tracking and leaderboard
+- `/community` - Blog and community updates
+
+### API Routes
+- `/api/chat` - AI assistant endpoint
+- `/api/code` - Code execution endpoint
+- `/api/problems` - Problem management
+- `/api/users` - User statistics
+
+### Key Components
+- `CodeMirror` integration for code editing
+- `PanelGroup` for resizable layouts
+- Markdown support for problem descriptions
+- Pyodide for Python execution
+
+## Getting Started
+
+1. Environment Setup
+```bash
+npm install

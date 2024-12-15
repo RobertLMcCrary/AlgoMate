@@ -46,6 +46,18 @@ export async function POST(req) {
         });
     }
 
+    if (evt.type === 'user.updated') {
+        await Users.updateOne(
+            { clerkId: id },
+            {
+                $set: {
+                    imageUrl: evt.data.image_url,
+                    username: evt.data.username,
+                },
+            }
+        );
+    }
+
     await client.close();
     return new Response('Webhook received', { status: 200 });
 }
