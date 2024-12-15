@@ -26,6 +26,9 @@ import { indentUnit } from '@codemirror/language';
 //python function calls for pyodide
 import { pythonFunctionCalls } from '@/utils/codeExecutionUtils';
 
+//clerk user
+import { useUser } from '@clerk/nextjs';
+
 export default function ProblemPage() {
     //fetching the problems
     const params = useParams();
@@ -43,6 +46,8 @@ export default function ProblemPage() {
     const [selectedLanguage, setSelectedLanguage] = useState('javascript');
     //state management for pyodide
     const [pyodide, setPyodide] = useState(null);
+    //user for update user progress
+    const { user } = useUser();
 
     useEffect(() => {
         if (selectedLanguage === 'python' && !pyodide) {
@@ -170,6 +175,8 @@ export default function ProblemPage() {
                         language: selectedLanguage,
                         problemId: problem.id,
                         testCases: problem.testCases,
+                        difficulty: problem.difficulty,
+                        userId: user?.id,
                     }),
                 });
 
@@ -188,7 +195,6 @@ export default function ProblemPage() {
                         pyodide.runPython(functionCall(code));
                         const result = pyodide.globals.get('result');
 
-                        // Convert Python result to JavaScript
                         const jsResult =
                             result instanceof pyodide.ffi.PyProxy
                                 ? result.toJs()
@@ -214,6 +220,25 @@ export default function ProblemPage() {
                         };
                     }
                 });
+
+                // Send results to backend for progress tracking
+                const res = await fetch('/api/code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code,
+                        language: selectedLanguage,
+                        problemId: problem.id,
+                        testCases: problem.testCases,
+                        difficulty: problem.difficulty,
+                        userId: user?.id,
+                        results,
+                    }),
+                });
+
+                const data = await res.json();
                 setResults(results);
             }
         } catch (error) {

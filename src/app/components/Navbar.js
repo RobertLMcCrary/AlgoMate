@@ -34,9 +34,9 @@ function Navbar() {
                                 Problems
                             </span>
                         </Link>
-                        <Link href="/pricing">
+                        <Link href="/stats">
                             <span className="text-white text-lg font-medium hover:text-gray-300 transition">
-                                Pricing
+                                Profile
                             </span>
                         </Link>
                         <Link href="/contact">

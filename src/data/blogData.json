@@ -6,5 +6,13 @@
         "author": "Dev Team",
         "excerpt": "Discover how our community empowers you to ace coding interviews.",
         "content": "Welcome to our community! We're excited to have you on board. This platform is designed to help you tackle coding interviews with confidence and finesse."
+    },
+    {
+        "id": "2",
+        "title": "Welcome to Our Community!",
+        "date": "2024-15-12",
+        "author": "Robert McCrary",
+        "excerpt": "Discover how our community empowers you to ace coding interviews.",
+        "content": "Welcome to PseudoAI - Your Ultimate Technical Interview Preparation Platform!\n\nWe're excited to showcase our innovative features designed to enhance your coding interview preparation:\n\n🤖 AI Assistant\nOur intelligent AI mentor provides personalized guidance, hints, and conceptual explanations without giving away solutions. It helps you learn and grow while maintaining the challenge of problem-solving.\n\n📝 Pseudo Code Generation\nStruggling to start? Our AI can generate clear, step-by-step pseudocode to help structure your approach. This feature bridges the gap between problem understanding and implementation.\n\n📊 Progress Tracking\nTrack your journey with detailed statistics! Monitor your progress across easy, medium, and hard problems. Our leaderboard system shows your ranking among peers, creating a motivating environment for improvement.\n\n👥 Community Features\nConnect with fellow developers, view their progress, and learn from their achievements. Our platform fosters a supportive community of learners.\n\n🚀 Coming Soon: PseudoAI Pro\nWe're thrilled to announce our upcoming premium features:\n- Live Mock Interviews: Practice with real-time feedback\n- Collaborative Code Editing: Solve LeetCode problems with friends in real-time\n- Advanced Ranking System: Compete in leagues and earn achievements\n- Enhanced Social Features: Build your network of fellow technical interviewees\n- Gamified Learning Experience: Make interview prep engaging and fun\n\nJoin us in revolutionizing technical interview preparation. Start your journey with PseudoAI today!"
     }
 ]

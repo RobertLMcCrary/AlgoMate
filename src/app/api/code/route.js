@@ -1,6 +1,5 @@
 import { javascriptFunctionCalls } from '@/utils/codeExecutionUtils';
-import { updateUserProgress } from '../../../../lib/userProgress';
-import { auth } from '@clerk/nextjs';
+import { MongoClient } from 'mongodb';
 
 //we not using judge0 api anymore because it is lowkey too expensive
 //keep this code snippet just in case though
@@ -44,24 +43,57 @@ function runJavaScriptLocally(code, testCases, problemId) {
     });
 }
 
-//post request for running the code
 export async function POST(req) {
-    const { code, language, problemId, testCases } = await req.json();
-    const { userId } = auth();
+    const {
+        code,
+        language,
+        problemId,
+        testCases,
+        difficulty,
+        userId,
+        results: pythonResults,
+    } = await req.json();
 
     try {
+        let results;
         if (language === 'javascript') {
-            const results = runJavaScriptLocally(code, testCases, problemId);
-
-            // Check if all test cases passed
-            const allTestsPassed = results.every((result) => result.passed);
-
-            if (allTestsPassed && userId) {
-                await updateUserProgress(userId, problemId, problem.difficulty);
-            }
-
-            return new Response(JSON.stringify({ results }), { status: 200 });
+            results = runJavaScriptLocally(code, testCases, problemId);
+        } else if (language === 'python') {
+            results = pythonResults;
         }
+
+        const allTestsPassed = results.every((result) => result.passed);
+
+        if (allTestsPassed && userId) {
+            const client = await MongoClient.connect(process.env.MONGO_URI);
+            const db = client.db('PseudoAI');
+            const Users = db.collection('Users');
+
+            // Only increment and add to solvedProblems if this problem hasn't been solved before
+            await Users.updateOne(
+                {
+                    clerkId: userId,
+                    'solvedProblems.problemId': { $ne: problemId }, // Check if problem hasn't been solved
+                },
+                {
+                    $inc: {
+                        [`problemsSolved.${difficulty.toLowerCase()}`]: 1,
+                    },
+                    $push: {
+                        solvedProblems: {
+                            problemId,
+                            difficulty,
+                            language,
+                            solvedAt: new Date(),
+                        },
+                    },
+                }
+            );
+
+            await client.close();
+        }
+
+        return new Response(JSON.stringify({ results }), { status: 200 });
     } catch (error) {
         return new Response(
             JSON.stringify({
