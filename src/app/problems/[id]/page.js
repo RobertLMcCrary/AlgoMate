@@ -107,6 +107,7 @@ export default function ProblemPage() {
                      3. Explain relevant concepts
                      4. Suggest approaches without giving the solution
                      5. If asked for the solution, remind the user that you can only provide hints
+                     6. Dont give irrelevant information and be concise
                      
                      Problem Context:
                      ${problem?.description}
