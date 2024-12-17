@@ -1,6 +1,6 @@
 //dedicated file for all of the function calls for the every problem
 
-//make sure not to add any white space or indent because python sucks
+//make sure not to add any white spaces for the python function calls
 export const pythonFunctionCalls = {
     'two-sum': (code) => `
 ${code}
@@ -48,6 +48,20 @@ result = longestValidParentheses(s)
 ${code}
 result = solution(input)
     `,
+    'merge-sorted-array': (code) => `
+${code}
+nums1 = input.nums1
+m = input.m
+nums2 = input.nums2
+n = input.n
+merge(nums1, m, nums2, n)
+    `,
+    'find-median-sorted-arrays': (code) => `
+${code}
+nums1 = input.nums1
+nums2 = input.nums2
+result = findMedianSortedArrays(nums1, nums2)
+    `,
 };
 
 export const javascriptFunctionCalls = {
@@ -92,6 +106,20 @@ export const javascriptFunctionCalls = {
         ${code}
         const s = input.s;
         return longestValidParentheses(s);
+    `,
+    'merge-sorted-array': (code) => `
+        ${code}
+        const nums1 = input.nums1;
+        const m = input.m;
+        const nums2 = input.nums2;
+        const n = input.n;
+        merge(nums1, m, nums2, n);
+    `,
+    'find-median-sorted-arrays': (code) => `
+        ${code}
+        const nums1 = input.nums1;
+        const nums2 = input.nums2;
+        return findMedianSortedArrays(nums1, nums2);
     `,
     default: (code) => `
         ${code}

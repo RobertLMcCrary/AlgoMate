@@ -61,17 +61,24 @@ function Dashboard() {
                         </Link>
                     </section>
 
-                    {/* Stats & Progress Section */}
-                    <section className="bg-gray-800 p-8 rounded-3xl text-center shadow-xl w-full md:w-1/2 hover:bg-gray-700 transition">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-100 mb-4">
-                            Total Problems Solved
-                        </h1>
-                        <p className="text-4xl md:text-5xl font-extrabold text-green-500 mb-2">
-                            {totalSolved}
+                    <section className="bg-gray-800 p-8 rounded-3xl shadow-xl w-full md:w-1/2 hover:bg-gray-700 transition">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-3xl font-bold text-gray-100">
+                                Featured Problem: Palindrome Number
+                            </h3>
+                            <span className="bg-green-600 px-4 py-2 rounded-full text-sm">
+                                Easy
+                            </span>
+                        </div>
+                        <p className="text-gray-300 mb-6">
+                            Given an integer x, return true if x is a
+                            palindrome, and false otherwise.
                         </p>
-                        <p className="text-sm md:text-lg text-gray-300">
-                            All problems solved, from Easy to Hard.
-                        </p>
+                        <Link href="/problems/palindrome-number">
+                            <span className="text-green-400 hover:text-green-300 font-semibold text-xl">
+                                Solve Now →
+                            </span>
+                        </Link>
                     </section>
                 </div>
 
@@ -102,7 +109,7 @@ function Dashboard() {
                         Contribute to the community, share your solutions, and
                         grow together with fellow developers.
                     </p>
-                    <div className="flex justify-center gap-6">
+                    <div className="flex justify-center items-center gap-6">
                         <a
                             href="https://github.com/RobertLMcCrary/PseudoAI.git"
                             target="_blank"

@@ -63,9 +63,6 @@ const UserProfilePage = () => {
 
                 {/* User Profile Info */}
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold">
-                        {userData.username}&apos;s Profile
-                    </h1>
                     <div className="flex items-center justify-center mt-6">
                         {userData.imageUrl ? (
                             <Image
@@ -81,6 +78,7 @@ const UserProfilePage = () => {
                             </div>
                         )}
                     </div>
+                    <h1 className="text-4xl font-bold">{userData.username}</h1>
                 </div>
 
                 {/* User Statistics */}
