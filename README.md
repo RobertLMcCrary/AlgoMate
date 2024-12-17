@@ -49,8 +49,15 @@ PseudoAI is a modern technical interview preparation platform that combines AI a
 - Markdown support for problem descriptions
 - Pyodide for Python execution
 
-## Getting Started
-
-1. Environment Setup
+# Getting Started
+### Environment Setup
+- install dependencies
 ```bash
 npm install
+```
+### Running the localhost
+- make sure you sign up on the website before running the localhost
+- [PseudoAI](https://pseudoai.dev)
+```bash
+npm run dev
+```
