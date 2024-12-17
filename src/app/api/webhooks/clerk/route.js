@@ -37,6 +37,7 @@ export async function POST(req) {
                 hard: 0,
             },
             solvedProblems: [],
+            friends: [],
         });
     }
     await client.close();
