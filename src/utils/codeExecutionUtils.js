@@ -67,6 +67,18 @@ ${code}
 n = input.n
 result = climbStairs(n)
     `,
+    'valid-parentheses': (code) => `
+${code}
+s = input.s
+result = isValid(s)
+    `,
+    'best-time-to-buy-and-sell-stock': (code) => `
+${code}
+prices = input.prices
+result = maxProfit(prices)
+    `
+
+
 };
 
 export const javascriptFunctionCalls = {
@@ -131,6 +143,17 @@ export const javascriptFunctionCalls = {
         const n = input.n;
         return climbStairs(n);
     `,
+    'valid-parentheses': (code) => `
+        ${code}
+        const s = input.s;
+        return isValid(s);
+    `,
+    'best-time-to-buy-and-sell-stock': (code) => `
+        ${code}
+        const prices = input.prices;
+        return maxProfit(prices);
+    `,
+
     default: (code) => `
         ${code}
         return solution(input);
