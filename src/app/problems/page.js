@@ -129,7 +129,7 @@ export default function ProblemsPage() {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 mt-8">
+            <div className="max-w-7xl mx-auto px-4 my-8">
                 <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden">
                     <table className="w-full text-left">
                         <thead className="bg-purple-700 text-white">
@@ -192,6 +192,7 @@ export default function ProblemsPage() {
                     </table>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

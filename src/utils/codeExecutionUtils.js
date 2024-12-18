@@ -62,6 +62,11 @@ nums1 = input.nums1
 nums2 = input.nums2
 result = findMedianSortedArrays(nums1, nums2)
     `,
+    'climbing-stairs': (code) => `
+${code}
+n = input.n
+result = climbStairs(n)
+    `,
 };
 
 export const javascriptFunctionCalls = {
@@ -120,6 +125,11 @@ export const javascriptFunctionCalls = {
         const nums1 = input.nums1;
         const nums2 = input.nums2;
         return findMedianSortedArrays(nums1, nums2);
+    `,
+    'climbing-stairs': (code) => `
+        ${code}
+        const n = input.n;
+        return climbStairs(n);
     `,
     default: (code) => `
         ${code}
