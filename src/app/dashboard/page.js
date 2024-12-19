@@ -2,22 +2,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 
 function Dashboard() {
     const { id } = useParams();
+    const { user } = useUser();
     const [userData, setUserData] = useState(null);
+    const [problemCount, setProblemCount] = useState(0);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const response = await fetch(`/api/users/${id}`);
-            const data = await response.json();
-            setUserData(data);
-        };
-        fetchUserData();
-    }, [id]);
+        const fetchData = async () => {
+            if (user?.id) {
+                const userResponse = await fetch(`/api/users/${user.id}`);
+                const userData = await userResponse.json();
+                setUserData(userData);
 
-    // Only calculate totalSolved if userData is available
+                const countResponse = await fetch('/api/problems/count');
+                const countData = await countResponse.json();
+                setProblemCount(countData.count);
+            }
+        };
+
+        fetchData();
+    }, [user?.id]);
+
     const totalSolved = userData
         ? (userData.problemsSolved?.easy || 0) +
           (userData.problemsSolved?.medium || 0) +
@@ -27,7 +36,6 @@ function Dashboard() {
     return (
         <div className="bg-gray-900 text-white min-h-screen flex flex-col">
             <main className="flex-grow p-12">
-                {/* Welcome Section */}
                 <section className="text-center mb-12">
                     <h2 className="text-5xl font-extrabold text-white mb-4">
                         Welcome Back!
@@ -39,15 +47,16 @@ function Dashboard() {
                 </section>
 
                 <div className="flex justify-between gap-8 mb-12">
-                    {/* Featured Problem Section */}
                     <section className="bg-gray-800 p-8 rounded-3xl shadow-xl w-full md:w-1/2 hover:bg-gray-700 transition">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-3xl font-bold text-gray-100">
                                 Featured Problem: Two Sum
                             </h3>
-                            <span className="bg-green-600 px-4 py-2 rounded-full text-sm">
-                                Easy
-                            </span>
+                            <div className="flex flex-col items-end">
+                                <span className="bg-green-600 px-4 py-2 rounded-full text-sm">
+                                    Easy
+                                </span>
+                            </div>
                         </div>
                         <p className="text-gray-300 mb-6">
                             Given an array of integers `nums` and a target
@@ -64,25 +73,43 @@ function Dashboard() {
                     <section className="bg-gray-800 p-8 rounded-3xl shadow-xl w-full md:w-1/2 hover:bg-gray-700 transition">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-3xl font-bold text-gray-100">
-                                Featured Problem: Palindrome Number
+                                Your Progress
                             </h3>
-                            <span className="bg-green-600 px-4 py-2 rounded-full text-sm">
-                                Easy
-                            </span>
+                            <div className="flex flex-col items-end">
+                                <span className="bg-purple-600 px-4 py-2 rounded-full text-sm">
+                                    {totalSolved} Solved
+                                </span>
+                            </div>
                         </div>
-                        <p className="text-gray-300 mb-6">
-                            Given an integer x, return true if x is a
-                            palindrome, and false otherwise.
-                        </p>
-                        <Link href="/problems/palindrome-number">
-                            <span className="text-green-400 hover:text-green-300 font-semibold text-xl">
-                                Solve Now →
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-300">Easy</span>
+                                <span className="text-green-400">
+                                    {userData?.problemsSolved?.easy || 0} solved
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-300">Medium</span>
+                                <span className="text-yellow-400">
+                                    {userData?.problemsSolved?.medium || 0}{' '}
+                                    solved
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-300">Hard</span>
+                                <span className="text-red-400">
+                                    {userData?.problemsSolved?.hard || 0} solved
+                                </span>
+                            </div>
+                        </div>
+                        <Link href="/problems" className="block mt-6">
+                            <span className="text-purple-400 hover:text-purple-300 font-semibold text-xl">
+                                View All Problems →
                             </span>
                         </Link>
                     </section>
                 </div>
 
-                {/* Upcoming Features Section */}
                 <section className="bg-gray-800 p-8 rounded-3xl shadow-xl mb-12 hover:bg-gray-700 transition">
                     <h3 className="text-3xl font-bold text-gray-100 mb-6">
                         Unlock PseudoAI Pro Features
@@ -100,27 +127,19 @@ function Dashboard() {
                     </div>
                 </section>
 
-                {/* Community Section */}
                 <section className="bg-gray-800 p-8 rounded-3xl shadow-xl hover:bg-gray-700 transition">
                     <h3 className="text-3xl font-bold text-gray-100 mb-6">
-                        Join Our Open-Source Community
+                        Check Out Our Blog
                     </h3>
                     <p className="text-gray-300 mb-6">
-                        Contribute to the community, share your solutions, and
-                        grow together with fellow developers.
+                        Learn about coding interview strategies, problem-solving
+                        techniques, and stay updated with the latest tech
+                        trends.
                     </p>
-                    <div className="flex justify-center items-center gap-6">
-                        <a
-                            href="https://github.com/RobertLMcCrary/PseudoAI.git"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block bg-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-indigo-500 transition text-xl"
-                        >
-                            Contribute
-                        </a>
+                    <div className="flex justify-center">
                         <Link href="/community">
-                            <span className="text-blue-500 hover:underline text-xl">
-                                Check out our Blog.
+                            <span className="bg-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-indigo-500 transition text-xl">
+                                Read Our Blog
                             </span>
                         </Link>
                     </div>
