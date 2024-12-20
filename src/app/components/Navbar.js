@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     SignedIn,
@@ -10,7 +10,38 @@ import {
     UserProfile,
 } from '@clerk/nextjs';
 
+import { useUser } from '@clerk/nextjs';
+
 function Navbar() {
+    const { user } = useUser();
+    const [userProgress, setUserProgress] = useState({
+        totalSolved: 0,
+        easySolved: 0,
+        mediumSolved: 0,
+        hardSolved: 0,
+        solvedProblems: [],
+    });
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (user) {
+                const response = await fetch(`/api/users/${user.id}`);
+                const data = await response.json();
+
+                setUserProgress({
+                    totalSolved:
+                        data.problemsSolved.easy +
+                        data.problemsSolved.medium +
+                        data.problemsSolved.hard,
+                    easySolved: data.problemsSolved.easy,
+                    mediumSolved: data.problemsSolved.medium,
+                    hardSolved: data.problemsSolved.hard,
+                    solvedProblems: data.solvedProblems,
+                });
+            }
+        };
+    }, [user]);
+
     return (
         <nav className="bg-gradient-to-r from-blue-500 to-purple-700 p-4 shadow-lg">
             <div className="container mx-auto flex justify-between items-center">
@@ -34,14 +65,9 @@ function Navbar() {
                                 Problems
                             </span>
                         </Link>
-                        <Link href="/stats">
+                        <Link href={`/users/${user?.id}`}>
                             <span className="text-white text-lg font-medium hover:text-gray-300 transition">
                                 Profile
-                            </span>
-                        </Link>
-                        <Link href="/contact">
-                            <span className="text-white text-lg font-medium hover:text-gray-300 transition">
-                                Contact
                             </span>
                         </Link>
                         <UserButton />

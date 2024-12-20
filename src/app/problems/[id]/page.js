@@ -370,7 +370,7 @@ export default function ProblemPage() {
                     )}
                 </Panel>
 
-                <PanelResizeHandle className="w-[5px] bg-gray-800 hover:bg-gray-700" />
+                <PanelResizeHandle className="w-[1px] bg-gray-700" />
 
                 {/* Code Editor Section */}
                 <Panel
@@ -549,7 +549,7 @@ export default function ProblemPage() {
                     )}
                 </Panel>
 
-                <PanelResizeHandle className="w-[5px] bg-gray-800  hover:bg-gray-700" />
+                <PanelResizeHandle className="w-[1px] bg-gray-700" />
 
                 {/* AI Chat Section */}
                 <Panel
