@@ -33,7 +33,13 @@ export default function ProblemsPage() {
     }, []);
 
     const allTopics = [
-        ...new Set(problems.flatMap((problem) => problem.topics.split(', '))),
+        ...new Set(
+            problems.flatMap((problem) =>
+                typeof problem.topics === 'string'
+                    ? problem.topics.split(', ')
+                    : []
+            )
+        ),
     ].sort();
 
     const applyFilters = useCallback(() => {
