@@ -76,7 +76,30 @@ result = isValid(s)
 ${code}
 prices = input.prices
 result = maxProfit(prices)
-    `
+    `,
+    'product-of-array-except-self': (code) => `
+${code}
+nums = input.nums
+result = productExceptSelf(nums)
+    `,
+    'coin-change': (code) => `
+${code}
+coins = input.coins
+amount = input.amount
+result = coinChange(coins, amount)
+    `,
+    'longest-increasing-subsequence': (code) => `
+${code}
+nums = input["nums"]
+result = lengthOfLIS(nums)
+    `,
+    'find-peak-element': (code) => `
+${code}
+nums = input.nums
+result = findPeakElement(nums)
+    `,
+
+
 
 
 };
@@ -153,7 +176,28 @@ export const javascriptFunctionCalls = {
         const prices = input.prices;
         return maxProfit(prices);
     `,
-
+    'product-of-array-except-self': (code) => `
+        ${code}
+        const nums = input.nums;
+        return productExceptSelf(nums);
+    `,
+    'coin-change': (code) => `
+        ${code}
+        const coins = input.coins;
+        const amount = input.amount;
+        const result = coinChange(coins, amount);
+    `,
+    'longest-increasing-subsequence': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = lengthOfLIS(nums);
+    `,
+    'find-peak-element': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = findPeakElement(nums);
+    `,
+    
     default: (code) => `
         ${code}
         return solution(input);
