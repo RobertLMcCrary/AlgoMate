@@ -31,7 +31,7 @@ function BlogPostPage() {
                 </p>
                 <div className="prose prose-invert max-w-none">
                     <ReactMarkdown
-                        className="text-gray-300 leading-relaxed whitespace-pre-wrap"
+                        className="text-gray-300 text-xl leading-relaxed whitespace-pre-wrap"
                         components={{
                             p: ({ node, ...props }) => (
                                 <p className="mb-4" {...props} />

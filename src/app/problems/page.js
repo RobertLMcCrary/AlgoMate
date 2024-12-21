@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useUser } from '@clerk/nextjs';
 
 export default function ProblemsPage() {
     const [problems, setProblems] = useState([]);
@@ -11,26 +12,37 @@ export default function ProblemsPage() {
     const [selectedTopic, setSelectedTopic] = useState('');
     const [selectedDifficulty, setSelectedDifficulty] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const { user } = useUser();
+    const [userSolvedProblems, setUserSolvedProblems] = useState([]);
 
-    // Fetch problems from the API
     useEffect(() => {
-        const fetchProblems = async () => {
-            try {
-                const response = await fetch('/api/problems');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch problems');
-                }
-                const data = await response.json();
-                console.log('Fetched problems:', data);
-                setProblems(data);
-                setFilteredProblems(data);
-            } catch (error) {
-                console.error(error);
+        const fetchData = async () => {
+            const problemsResponse = await fetch('/api/problems');
+            const problemsData = await problemsResponse.json();
+            setProblems(problemsData);
+            setFilteredProblems(problemsData);
+
+            if (user?.id) {
+                const userResponse = await fetch(`/api/users/${user.id}`);
+                const userData = await userResponse.json();
+                setUserSolvedProblems(userData.solvedProblems || []);
             }
         };
+        fetchData();
+    }, [user?.id]);
 
-        fetchProblems();
-    }, []);
+    //limiting # of problems on each page
+    const [currentPage, setCurrentPage] = useState(1);
+    const problemsPerPage = 10;
+
+    // Calculate pagination values
+    const indexOfLastProblem = currentPage * problemsPerPage;
+    const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
+    const currentProblems = filteredProblems.slice(
+        indexOfFirstProblem,
+        indexOfLastProblem
+    );
+    const totalPages = Math.ceil(filteredProblems.length / problemsPerPage);
 
     const allTopics = [
         ...new Set(
@@ -81,121 +93,137 @@ export default function ProblemsPage() {
     }, [selectedTopic, selectedDifficulty, searchQuery, applyFilters]);
 
     return (
-        <div className="bg-gray-900 min-h-screen text-gray-200">
+        <div className="min-h-screen bg-gray-900">
             <Navbar />
+            <div className="max-w-7xl mx-auto py-8 px-4">
+                <h1 className="text-3xl font-bold text-white mb-8">Problems</h1>
 
-            {/* Search and Filters Section */}
-            <div className="max-w-7xl mx-auto px-4 mt-8">
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search problems by title or topic..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-purple-500"
-                    />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex gap-4 mb-6">
                     <select
-                        className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200"
+                        value={selectedDifficulty}
+                        onChange={(e) => setSelectedDifficulty(e.target.value)}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+                    >
+                        <option value="All">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+
+                    <select
                         value={selectedTopic}
                         onChange={(e) => setSelectedTopic(e.target.value)}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700"
                     >
-                        <option value="">All Topics</option>
+                        <option value="All">All Topics</option>
                         {allTopics.map((topic) => (
                             <option key={topic} value={topic}>
                                 {topic}
                             </option>
                         ))}
                     </select>
-
-                    <select
-                        className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-200"
-                        value={selectedDifficulty}
-                        onChange={(e) => setSelectedDifficulty(e.target.value)}
-                    >
-                        <option value="">All Difficulties</option>
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </select>
-
-                    <button
-                        onClick={resetFilters}
-                        className="bg-gray-700 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition"
-                    >
-                        Reset Filters
-                    </button>
-
-                    <span className="ml-auto text-gray-400">
-                        Showing {filteredProblems.length} of {problems.length}{' '}
-                        problems
-                    </span>
                 </div>
-            </div>
 
-            <div className="max-w-7xl mx-auto px-4 my-8">
-                <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="bg-purple-700 text-white">
+                <div className="bg-gray-800 rounded-lg overflow-hidden">
+                    <table className="w-full text-white">
+                        <thead className="bg-gray-700">
                             <tr>
-                                <th className="px-4 py-3">Title</th>
-                                <th className="px-4 py-3">Difficulty</th>
-                                <th className="px-4 py-3">Topic</th>
-                                <th className="px-4 py-3 text-right">
-                                    Actions
+                                <th className="px-6 py-3 text-left">Title</th>
+                                <th className="px-6 py-3 text-left">
+                                    Difficulty
                                 </th>
+                                <th className="px-6 py-3 text-left">Topics</th>
+                                <th className="px-6 py-3 text-left"></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {filteredProblems.length > 0 ? (
-                                filteredProblems.map((problem) => (
-                                    <tr
-                                        key={problem.id}
-                                        className="border-b border-gray-700 hover:bg-gray-700"
-                                    >
-                                        <td className="px-4 py-3">
-                                            {problem.title}
-                                        </td>
-                                        <td
-                                            className={`px-4 py-3 ${
+                        <tbody className="divide-y divide-gray-700">
+                            {currentProblems.map((problem) => (
+                                <tr
+                                    key={problem._id}
+                                    className="hover:bg-gray-700 transition-colors"
+                                >
+                                    <td className="px-4 py-3">
+                                        {problem.title}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-sm ${
                                                 problem.difficulty === 'Easy'
-                                                    ? 'text-green-400'
+                                                    ? 'bg-green-600'
                                                     : problem.difficulty ===
                                                       'Medium'
-                                                    ? 'text-yellow-400'
-                                                    : 'text-red-400'
+                                                    ? 'bg-yellow-600'
+                                                    : 'bg-red-600'
                                             }`}
                                         >
                                             {problem.difficulty}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {problem.topics}
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <Link
-                                                href={`/problems/${problem.id}`}
-                                                className="text-purple-400 hover:underline"
-                                            >
-                                                View Problem
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan="4"
-                                        className="px-4 py-8 text-center text-gray-400"
-                                    >
-                                        No problems found matching the selected
-                                        filters.
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {problem.topics}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <Link
+                                            href={`/problems/${problem.id}`}
+                                            className="text-purple-400 hover:underline"
+                                        >
+                                            View Problem
+                                        </Link>
                                     </td>
                                 </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
+
+                    <div className="flex justify-between items-center mt-4 px-4 py-4 border-t border-gray-700">
+                        <button
+                            onClick={() =>
+                                setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-50 hover:bg-gray-600 transition"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </button>
+
+                        <span className="text-gray-400">
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() =>
+                                setCurrentPage((prev) =>
+                                    Math.min(prev + 1, totalPages)
+                                )
+                            }
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-50 hover:bg-gray-600 transition"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <Footer />

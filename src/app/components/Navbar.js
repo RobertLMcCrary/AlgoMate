@@ -65,6 +65,11 @@ function Navbar() {
                                 Problems
                             </span>
                         </Link>
+                        <Link href="/leaderboard">
+                            <span className="text-white text-lg font-medium hover:text-gray-300 transition">
+                                Leaderboard
+                            </span>
+                        </Link>
                         <Link href={`/users/${user?.id}`}>
                             <span className="text-white text-lg font-medium hover:text-gray-300 transition">
                                 Profile
