@@ -98,6 +98,22 @@ ${code}
 nums = input.nums
 result = findPeakElement(nums)
     `,
+    'subarray-sum-equals-k': (code) => `
+${code}
+nums = input["nums"]
+k = input["k"]
+result = subarraySum(nums, k)
+    `,
+    'longest-consecutive-sequence': (code) => `
+${code}
+nums = input["nums"]
+result = longestConsecutive(nums)
+    `,
+    'maximum-subarray': (code) => `
+${code}
+nums = input["nums"]
+result = maxSubArray(nums)
+    `,
 
 
 
@@ -197,7 +213,23 @@ export const javascriptFunctionCalls = {
         const nums = input.nums;
         const result = findPeakElement(nums);
     `,
-    
+    'subarray-sum-equals-k': (code) => `
+        ${code}
+        const nums = input.nums;
+        const k = input.k;
+        const result = subarraySum(nums, k);
+    `,
+    'longest-consecutive-sequence': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = longestConsecutive(nums);
+    `,
+    'maximum-subarray': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = maxSubArray(nums);
+    `,
+
     default: (code) => `
         ${code}
         return solution(input);
