@@ -77,6 +77,50 @@ ${code}
 prices = input.prices
 result = maxProfit(prices)
     `,
+<<<<<<< HEAD
+=======
+    'product-of-array-except-self': (code) => `
+${code}
+nums = input.nums
+result = productExceptSelf(nums)
+    `,
+    'coin-change': (code) => `
+${code}
+coins = input.coins
+amount = input.amount
+result = coinChange(coins, amount)
+    `,
+    'longest-increasing-subsequence': (code) => `
+${code}
+nums = input["nums"]
+result = lengthOfLIS(nums)
+    `,
+    'find-peak-element': (code) => `
+${code}
+nums = input.nums
+result = findPeakElement(nums)
+    `,
+    'subarray-sum-equals-k': (code) => `
+${code}
+nums = input["nums"]
+k = input["k"]
+result = subarraySum(nums, k)
+    `,
+    'longest-consecutive-sequence': (code) => `
+${code}
+nums = input["nums"]
+result = longestConsecutive(nums)
+    `,
+    'maximum-subarray': (code) => `
+${code}
+nums = input["nums"]
+result = maxSubArray(nums)
+    `,
+
+
+
+
+>>>>>>> origin/main
 };
 
 export const javascriptFunctionCalls = {
@@ -151,6 +195,46 @@ export const javascriptFunctionCalls = {
         const prices = input.prices;
         return maxProfit(prices);
     `,
+<<<<<<< HEAD
+=======
+    'product-of-array-except-self': (code) => `
+        ${code}
+        const nums = input.nums;
+        return productExceptSelf(nums);
+    `,
+    'coin-change': (code) => `
+        ${code}
+        const coins = input.coins;
+        const amount = input.amount;
+        const result = coinChange(coins, amount);
+    `,
+    'longest-increasing-subsequence': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = lengthOfLIS(nums);
+    `,
+    'find-peak-element': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = findPeakElement(nums);
+    `,
+    'subarray-sum-equals-k': (code) => `
+        ${code}
+        const nums = input.nums;
+        const k = input.k;
+        const result = subarraySum(nums, k);
+    `,
+    'longest-consecutive-sequence': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = longestConsecutive(nums);
+    `,
+    'maximum-subarray': (code) => `
+        ${code}
+        const nums = input.nums;
+        const result = maxSubArray(nums);
+    `,
+>>>>>>> origin/main
 
     default: (code) => `
         ${code}
