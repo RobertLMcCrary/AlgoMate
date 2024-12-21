@@ -77,8 +77,6 @@ ${code}
 prices = input.prices
 result = maxProfit(prices)
     `,
-<<<<<<< HEAD
-=======
     'product-of-array-except-self': (code) => `
 ${code}
 nums = input.nums
@@ -116,11 +114,6 @@ ${code}
 nums = input["nums"]
 result = maxSubArray(nums)
     `,
-
-
-
-
->>>>>>> origin/main
 };
 
 export const javascriptFunctionCalls = {
@@ -195,8 +188,6 @@ export const javascriptFunctionCalls = {
         const prices = input.prices;
         return maxProfit(prices);
     `,
-<<<<<<< HEAD
-=======
     'product-of-array-except-self': (code) => `
         ${code}
         const nums = input.nums;
@@ -234,7 +225,6 @@ export const javascriptFunctionCalls = {
         const nums = input.nums;
         const result = maxSubArray(nums);
     `,
->>>>>>> origin/main
 
     default: (code) => `
         ${code}
