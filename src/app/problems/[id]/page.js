@@ -99,16 +99,19 @@ export default function ProblemPage() {
             // Create a system message with instructions and problem context
             const systemMessage = {
                 role: 'system',
-                content: `You are a coding mentor helping with the problem "${problem?.title}". 
-                     IMPORTANT: DO NOT provide direct solutions or complete code answers. Work with the user step by step throughout the probelm.
-                     Try these steps when neccesary to help the user:
-                     1. Provide hints and guidance
-                     2. Ask leading questions
-                     3. Explain relevant concepts
-                     4. Suggest approaches without giving the solution
-                     5. If asked for the solution, remind the user that you can only provide hints
-                     6. Dont give irrelevant information 
-                     7. Be concise and not clutterry in one message get to the point
+                content: `You are a coding mentor helping the user solve the LeetCode problem "${problem?.title}". Do not provide all the information at once—answer step by step based on the user's input and maintain brevity.
+                     Your primary role is to guide the user step by step without directly providing a complete solution or code. NEVER provide the direct solution ever. 
+                     Follow these guidelines but remember, be concise and uncluttered in your responses. 
+                     1. Provide hints and ask leading questions: Help the user break the problem into smaller parts and think critically about their approach.
+                     2. Explain relevant concepts: Focus on the key ideas and logic needed to understand and solve the problem.
+                     3. Suggest strategies, not solutions: Offer general approaches, like using specific data structures or algorithms, without writing the code for them
+                     4. Redirect solution requests: If asked for the solution, remind the user of your mentoring role and guide them back to problem-solving.
+                     5. Motivate and affirm progress: Provide encouragement and acknowledge their efforts to keep them engaged.
+                     6. Encourage incremental solutions: Suggest building and testing small chunks of code to validate progress.
+                     7. Guide debugging efforts: Ask questions to help the user identify and resolve issues in their code.
+                     8. Highlight edge cases: Encourage the user to consider and handle unusual scenarios, such as empty inputs or large datasets.
+                     9. Dont give irrelevant information 
+                     10. Again be concise there should never be more than a paragraph of text in all your responses.
                      
                      Problem Context:
                      ${problem?.description}
@@ -261,24 +264,19 @@ export default function ProblemPage() {
     const generatePseudoCode = async () => {
         setLoading(true);
         try {
-            // Create a system message specifically for pseudo code generation
             const systemMessage = {
                 role: 'system',
-                content: `You are a coding mentor helping with the problem "${problem?.title}". 
-                         Generate clear, step-by-step pseudocode for this problem.
-                         The pseudocode should be detailed enough to guide the solution but not give away the exact implementation.
+                content: `Generate only pseudocode for the following problem. Do not include any introductory text - provide only the pseudocode steps.
                          
-                         Problem Context:
+                         Problem: "${problem?.title}"
                          ${problem?.description}
                          Difficulty: ${problem?.difficulty}
-                         Topics: ${problem?.topics}
-                         Language: ${selectedLanguage}`,
+                         Topics: ${problem?.topics}`
             };
 
             const userMessage = {
                 role: 'user',
-                content:
-                    'Generate pseudocode for this problem. Make it clear and educational.',
+                content: 'Generate pseudocode for this problem.'
             };
 
             const res = await fetch('/api/chat', {
@@ -297,21 +295,19 @@ export default function ProblemPage() {
 
             const data = await res.json();
             if (data && data.output) {
-                // Format the pseudo code as a multi-line comment based on the language
-                const commentPrefix =
-                    selectedLanguage === 'python' ? '#' : '//';
-                const pseudoCode = `/*\nPSEUDO CODE:\n${data.output
-                    .split('\n')
-                    .map((line) => line.trim())
-                    .join('\n')}\n*/\n\n${code}`;
-
-                setCode(pseudoCode);
+                const aiMessage = {
+                    role: 'assistant',
+                    content: `Here's the pseudocode for ${problem?.title}:\n\n${data.output}`
+                };
+                setMessages(prevMessages => [...prevMessages, aiMessage]);
             }
         } catch (error) {
             console.error('Error generating pseudo code:', error);
         }
         setLoading(false);
     };
+
+
 
     return (
         <div className="h-[100vh] bg-gray-800 overflow-y-auto">
@@ -493,11 +489,10 @@ export default function ProblemPage() {
                             {results.map((result, index) => (
                                 <div
                                     key={index}
-                                    className={`p-2 mb-2 rounded ${
-                                        result.passed
-                                            ? 'bg-green-900/50 text-green-200'
-                                            : 'bg-red-900/50 text-red-200'
-                                    }`}
+                                    className={`p-2 mb-2 rounded ${result.passed
+                                        ? 'bg-green-900/50 text-green-200'
+                                        : 'bg-red-900/50 text-red-200'
+                                        }`}
                                 >
                                     <div className="font-semibold flex items-center gap-2">
                                         <span>
@@ -562,52 +557,46 @@ export default function ProblemPage() {
                     </h2>
                     <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
                         {messages.map((message, index) =>
-                            message.role === 'user' ||
-                            message.role === 'assistant' ? (
+                            message.role === 'user' || message.role === 'assistant' ? (
                                 <div
                                     key={index}
-                                    className={`mb-4 ${
-                                        message.role === 'user'
+                                    className={`mb-4 ${message.role === 'user'
                                             ? 'text-blue-400'
                                             : 'text-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="font-bold mb-1">
-                                        {message.role === 'user'
-                                            ? 'You:'
-                                            : 'AI Assistant:'}
+                                        {message.role === 'user' ? 'You:' : 'AI Assistant:'}
                                     </div>
                                     <ReactMarkdown
                                         className="prose prose-invert max-w-none"
                                         remarkPlugins={[remarkGfm, remarkMath]}
                                         rehypePlugins={[rehypeKatex]}
                                         components={{
-                                            code({
-                                                node,
-                                                inline,
-                                                className,
-                                                children,
-                                                ...props
-                                            }) {
+                                            code({ node, inline, className, children, ...props }) {
                                                 return (
-                                                    <code
-                                                        className={`${className} bg-gray-800 rounded px-1`}
-                                                        {...props}
-                                                    >
+                                                    <code className={`${className} bg-gray-800 rounded px-1`} {...props}>
                                                         {children}
                                                     </code>
                                                 );
                                             },
                                             pre({ node, children, ...props }) {
                                                 return (
-                                                    <pre
-                                                        className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
-                                                        {...props}
-                                                    >
-                                                        {children}
-                                                    </pre>
+                                                    <div>
+                                                        <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto" {...props}>
+                                                            {children}
+                                                        </pre>
+                                                        {message.content.includes("Here's the pseudocode") && (
+                                                            <button
+                                                                onClick={() => navigator.clipboard.writeText(message.content)}
+                                                                className="mt-2 px-3 py-1 bg-gray-700 text-sm text-gray-300 rounded hover:bg-gray-600"
+                                                            >
+                                                                Copy Pseudocode
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 );
-                                            },
+                                            }
                                         }}
                                     >
                                         {message.content}
@@ -633,12 +622,12 @@ export default function ProblemPage() {
                         )}
                     </div>
                     <form onSubmit={handleUserInput} className="mt-4">
-                        <input
-                            type="text"
+                        <textarea
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
-                            className="w-full p-2 rounded border border-gray-700 text-gray-200 bg-gray-800"
+                            className="w-full p-2 rounded border border-gray-700 text-gray-200 bg-gray-800 resize-none"
                             placeholder="Ask something..."
+                            rows="2"
                         />
                         <button
                             type="submit"
