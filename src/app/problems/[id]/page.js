@@ -93,6 +93,7 @@ export default function ProblemPage() {
     }, [params.id]);
 
     //user input for chatbot
+    /*
     const handleUserInput = async (e) => {
         e.preventDefault();
         if (userInput.trim()) {
@@ -158,6 +159,83 @@ export default function ProblemPage() {
                 setResponse('Something went wrong. Please try again.');
             }
 
+            setLoading(false);
+        }
+    };
+    */
+
+    const handleUserInput = async (e) => {
+        e.preventDefault();
+        if (userInput.trim()) {
+            const systemMessage = {
+                role: 'system',
+                content: `You are a coding mentor helping the user solve the LeetCode problem "${problem?.title}". Do not provide all the information at once—answer step by step based on the user's input and maintain brevity.
+                         Your primary role is to guide the user step by step without directly providing a complete solution or code. NEVER provide the direct solution ever. 
+                         Follow these guidelines but remember, be concise and uncluttered in your responses. 
+                         1. Provide hints and ask leading questions: Help the user break the problem into smaller parts and think critically about their approach.
+                         2. Explain relevant concepts: Focus on the key ideas and logic needed to understand and solve the problem.
+                         3. Suggest strategies, not solutions: Offer general approaches, like using specific data structures or algorithms, without writing the code for them
+                         4. Redirect solution requests: If asked for the solution, remind the user of your mentoring role and guide them back to problem-solving.
+                         5. Motivate and affirm progress: Provide encouragement and acknowledge their efforts to keep them engaged.
+                         6. Encourage incremental solutions: Suggest building and testing small chunks of code to validate progress.
+                         7. Guide debugging efforts: Ask questions to help the user identify and resolve issues in their code.
+                         8. Highlight edge cases: Encourage the user to consider and handle unusual scenarios, such as empty inputs or large datasets.
+                         9. Dont give irrelevant information 
+                         10. Again be concise there should never be more than a paragraph of text in all your responses.
+                         
+                         Problem Context:
+                         ${problem?.description}
+                         Difficulty: ${problem?.difficulty}
+                         Topics: ${problem?.topics}
+                         Starter Code: ${problem?.starterCodes[selectedLanguage]}
+                         User Code: ${code}
+                         Language: ${selectedLanguage}`,
+            };
+
+            const userMessage = { role: 'user', content: userInput };
+            setMessages((prevMessages) => [...prevMessages, userMessage]);
+            setUserInput('');
+            setLoading(true);
+
+            // Create temporary message for streaming
+            const tempMessage = { role: 'assistant', content: '' };
+            setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [...messages, systemMessage, userMessage],
+                    }),
+                });
+
+                if (!res.ok)
+                    throw new Error(`HTTP error! status: ${res.status}`);
+
+                const reader = res.body.getReader();
+                let accumulatedContent = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = new TextDecoder().decode(value);
+                    accumulatedContent += text;
+
+                    setMessages((prevMessages) => {
+                        const newMessages = [...prevMessages];
+                        newMessages[newMessages.length - 1].content =
+                            accumulatedContent;
+                        return newMessages;
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setResponse('Something went wrong. Please try again.');
+            }
             setLoading(false);
         }
     };
@@ -271,12 +349,12 @@ export default function ProblemPage() {
                          Problem: "${problem?.title}"
                          ${problem?.description}
                          Difficulty: ${problem?.difficulty}
-                         Topics: ${problem?.topics}`
+                         Topics: ${problem?.topics}`,
             };
 
             const userMessage = {
                 role: 'user',
-                content: 'Generate pseudocode for this problem.'
+                content: 'Generate pseudocode for this problem.',
             };
 
             const res = await fetch('/api/chat', {
@@ -289,25 +367,35 @@ export default function ProblemPage() {
                 }),
             });
 
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-            const data = await res.json();
-            if (data && data.output) {
-                const aiMessage = {
-                    role: 'assistant',
-                    content: `Here's the pseudocode for ${problem?.title}:\n\n${data.output}`
-                };
-                setMessages(prevMessages => [...prevMessages, aiMessage]);
+            // Create temporary message for streaming
+            const tempMessage = { role: 'assistant', content: '' };
+            setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+            const reader = res.body.getReader();
+            let accumulatedContent = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const text = new TextDecoder().decode(value);
+                accumulatedContent += text;
+
+                setMessages((prevMessages) => {
+                    const newMessages = [...prevMessages];
+                    newMessages[
+                        newMessages.length - 1
+                    ].content = `Here's the pseudocode for ${problem?.title}:\n\n${accumulatedContent}`;
+                    return newMessages;
+                });
             }
         } catch (error) {
             console.error('Error generating pseudo code:', error);
         }
         setLoading(false);
     };
-
-
 
     return (
         <div className="h-[100vh] bg-gray-800 overflow-y-auto">
@@ -372,7 +460,7 @@ export default function ProblemPage() {
                 <Panel
                     defaultSize={50}
                     minSize={30}
-                    className="w-[50vw] bg-gray-800 p-6 overflow-y-auto"
+                    className="w-[50vw] bg-gray-800 p-6 flex flex-col h-full"
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold text-purple-400">
@@ -482,17 +570,18 @@ export default function ProblemPage() {
 
                     {/* Test Results */}
                     {results && (
-                        <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[37vh]">
+                        <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
                             <h3 className="text-lg font-semibold text-purple-400 mb-2">
                                 Test Results
                             </h3>
                             {results.map((result, index) => (
                                 <div
                                     key={index}
-                                    className={`p-2 mb-2 rounded ${result.passed
-                                        ? 'bg-green-900/50 text-green-200'
-                                        : 'bg-red-900/50 text-red-200'
-                                        }`}
+                                    className={`p-2 mb-2 rounded ${
+                                        result.passed
+                                            ? 'bg-green-900/50 text-green-200'
+                                            : 'bg-red-900/50 text-red-200'
+                                    }`}
                                 >
                                     <div className="font-semibold flex items-center gap-2">
                                         <span>
@@ -557,25 +646,38 @@ export default function ProblemPage() {
                     </h2>
                     <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
                         {messages.map((message, index) =>
-                            message.role === 'user' || message.role === 'assistant' ? (
+                            message.role === 'user' ||
+                            message.role === 'assistant' ? (
                                 <div
                                     key={index}
-                                    className={`mb-4 ${message.role === 'user'
+                                    className={`mb-4 ${
+                                        message.role === 'user'
                                             ? 'text-blue-400'
                                             : 'text-gray-300'
-                                        }`}
+                                    }`}
                                 >
                                     <div className="font-bold mb-1">
-                                        {message.role === 'user' ? 'You:' : 'AI Assistant:'}
+                                        {message.role === 'user'
+                                            ? 'You:'
+                                            : 'AI Assistant:'}
                                     </div>
                                     <ReactMarkdown
                                         className="prose prose-invert max-w-none"
                                         remarkPlugins={[remarkGfm, remarkMath]}
                                         rehypePlugins={[rehypeKatex]}
                                         components={{
-                                            code({ node, inline, className, children, ...props }) {
+                                            code({
+                                                node,
+                                                inline,
+                                                className,
+                                                children,
+                                                ...props
+                                            }) {
                                                 return (
-                                                    <code className={`${className} bg-gray-800 rounded px-1`} {...props}>
+                                                    <code
+                                                        className={`${className} bg-gray-800 rounded px-1`}
+                                                        {...props}
+                                                    >
                                                         {children}
                                                     </code>
                                                 );
@@ -583,12 +685,21 @@ export default function ProblemPage() {
                                             pre({ node, children, ...props }) {
                                                 return (
                                                     <div>
-                                                        <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto" {...props}>
+                                                        <pre
+                                                            className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
+                                                            {...props}
+                                                        >
                                                             {children}
                                                         </pre>
-                                                        {message.content.includes("Here's the pseudocode") && (
+                                                        {message.content.includes(
+                                                            "Here's the pseudocode"
+                                                        ) && (
                                                             <button
-                                                                onClick={() => navigator.clipboard.writeText(message.content)}
+                                                                onClick={() =>
+                                                                    navigator.clipboard.writeText(
+                                                                        message.content
+                                                                    )
+                                                                }
                                                                 className="mt-2 px-3 py-1 bg-gray-700 text-sm text-gray-300 rounded hover:bg-gray-600"
                                                             >
                                                                 Copy Pseudocode
@@ -596,24 +707,13 @@ export default function ProblemPage() {
                                                         )}
                                                     </div>
                                                 );
-                                            }
+                                            },
                                         }}
                                     >
                                         {message.content}
                                     </ReactMarkdown>
                                 </div>
                             ) : null
-                        )}
-                        {loading && (
-                            <div className="text-gray-300 flex items-center gap-2">
-                                <span className="font-bold">AI Assistant:</span>
-                                <div className="flex items-center">
-                                    <span>Thinking</span>
-                                    <span className="ml-1 animate-pulse">
-                                        ...
-                                    </span>
-                                </div>
-                            </div>
                         )}
                         {messages.length === 0 && (
                             <p className="text-gray-400">
