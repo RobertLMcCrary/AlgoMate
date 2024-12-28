@@ -22,9 +22,6 @@ export async function GET(request) {
         // Fetch problems from the collection
         const problems = await collection.find({}).toArray();
 
-        // Log the fetched data for debugging
-        console.log('Fetched problems from database:', problems);
-
         // Return the data as a JSON response
         return new Response(JSON.stringify(problems), {
             headers: { 'Content-Type': 'application/json' },

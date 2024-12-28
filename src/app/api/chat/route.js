@@ -3,6 +3,7 @@ import { HfInference } from '@huggingface/inference';
 export const maxDuration = 30; // Set max duration for Vercel serverless function
 export const dynamic = 'force-dynamic'; // Disable static optimization
 
+//this post request sends the output all at once
 /*
 export async function POST(req) {
     const { messages } = await req.json();
@@ -44,7 +45,8 @@ export async function POST(req) {
 }
 */
 
-//updated post request to handle the streaming output
+//updated post
+//ai output will be printed out piece by piece
 export async function POST(req) {
     const { messages } = await req.json();
     const encoder = new TextEncoder();

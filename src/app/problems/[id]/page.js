@@ -23,9 +23,6 @@ import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorView } from '@codemirror/view';
 import { indentUnit } from '@codemirror/language';
 
-//python function calls for pyodide
-import { pythonFunctionCalls } from '@/utils/codeExecutionUtils';
-
 //clerk user
 import { useUser } from '@clerk/nextjs';
 
@@ -91,78 +88,6 @@ export default function ProblemPage() {
                 .catch((error) => console.error('Error:', error));
         }
     }, [params.id]);
-
-    //user input for chatbot
-    /*
-    const handleUserInput = async (e) => {
-        e.preventDefault();
-        if (userInput.trim()) {
-            // Create a system message with instructions and problem context
-            const systemMessage = {
-                role: 'system',
-                content: `You are a coding mentor helping the user solve the LeetCode problem "${problem?.title}". Do not provide all the information at once—answer step by step based on the user's input and maintain brevity.
-                     Your primary role is to guide the user step by step without directly providing a complete solution or code. NEVER provide the direct solution ever. 
-                     Follow these guidelines but remember, be concise and uncluttered in your responses. 
-                     1. Provide hints and ask leading questions: Help the user break the problem into smaller parts and think critically about their approach.
-                     2. Explain relevant concepts: Focus on the key ideas and logic needed to understand and solve the problem.
-                     3. Suggest strategies, not solutions: Offer general approaches, like using specific data structures or algorithms, without writing the code for them
-                     4. Redirect solution requests: If asked for the solution, remind the user of your mentoring role and guide them back to problem-solving.
-                     5. Motivate and affirm progress: Provide encouragement and acknowledge their efforts to keep them engaged.
-                     6. Encourage incremental solutions: Suggest building and testing small chunks of code to validate progress.
-                     7. Guide debugging efforts: Ask questions to help the user identify and resolve issues in their code.
-                     8. Highlight edge cases: Encourage the user to consider and handle unusual scenarios, such as empty inputs or large datasets.
-                     9. Dont give irrelevant information 
-                     10. Again be concise there should never be more than a paragraph of text in all your responses.
-                     
-                     Problem Context:
-                     ${problem?.description}
-                     Difficulty: ${problem?.difficulty}
-                     Topics: ${problem?.topics}
-                     Starter Code: ${problem?.starterCodes[selectedLanguage]}
-                     User Code: ${code}
-                     Language: ${selectedLanguage}`,
-            };
-
-            const userMessage = { role: 'user', content: userInput };
-            setMessages((prevMessages) => [...prevMessages, userMessage]);
-            setUserInput('');
-            setLoading(true);
-
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        messages: [...messages, systemMessage, userMessage],
-                    }),
-                });
-
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-
-                const data = await res.json();
-                if (data && data.output) {
-                    const aiMessage = {
-                        role: 'assistant',
-                        content: data.output,
-                    };
-                    setMessages((prevMessages) => [...prevMessages, aiMessage]);
-                    setResponse(data.output);
-                } else {
-                    throw new Error('Received an empty or invalid response');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                setResponse('Something went wrong. Please try again.');
-            }
-
-            setLoading(false);
-        }
-    };
-    */
 
     const handleUserInput = async (e) => {
         e.preventDefault();
@@ -270,14 +195,13 @@ export default function ProblemPage() {
             } else if (selectedLanguage === 'python' && pyodide) {
                 const results = problem.testCases.map((testCase, index) => {
                     try {
-                        const functionCall =
-                            pythonFunctionCalls[problem.id] ||
-                            pythonFunctionCalls.default;
-
                         pyodide.globals.set('input', testCase.input);
-                        pyodide.runPython(functionCall(code));
+                        pyodide.runPython(
+                            code.trim() +
+                                '\n' +
+                                problem.functionCalls[selectedLanguage]
+                        );
                         const result = pyodide.globals.get('result');
-
                         const jsResult =
                             result instanceof pyodide.ffi.PyProxy
                                 ? result.toJs()
@@ -304,7 +228,7 @@ export default function ProblemPage() {
                     }
                 });
 
-                // Send results to backend for progress tracking
+                // Send Python results to backend for user progress update
                 const res = await fetch('/api/code', {
                     method: 'POST',
                     headers: {
@@ -314,14 +238,11 @@ export default function ProblemPage() {
                         code,
                         language: selectedLanguage,
                         problemId: problem.id,
-                        testCases: problem.testCases,
-                        difficulty: problem.difficulty,
                         userId: user?.id,
-                        results,
+                        pythonResults: results,
                     }),
                 });
 
-                const data = await res.json();
                 setResults(results);
             }
         } catch (error) {

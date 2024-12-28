@@ -18,13 +18,7 @@ export async function GET(request, { params }) {
         const db = client.db(dbName);
         const collection = db.collection('Problems');
 
-        // Add console.log to debug
-        console.log('Fetching problem with ID:', params.id);
-
         const problem = await collection.findOne({ id: params.id });
-
-        // Add console.log to debug
-        console.log('Found problem:', problem);
 
         if (!problem) {
             return new Response(

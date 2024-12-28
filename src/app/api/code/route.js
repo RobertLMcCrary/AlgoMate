@@ -1,4 +1,3 @@
-import { javascriptFunctionCalls } from '@/utils/codeExecutionUtils';
 import { MongoClient } from 'mongodb';
 
 //we not using judge0 api anymore because it is lowkey too expensive
@@ -12,14 +11,16 @@ const languageIds = {
 };
 */
 
-//running javascript locally
-function runJavaScriptLocally(code, testCases, problemId) {
+function runJavaScriptLocally(code, testCases, functionCall) {
     return testCases.map((testCase, index) => {
         try {
-            const functionCall =
-                javascriptFunctionCalls[problemId] ||
-                javascriptFunctionCalls.default;
-            const fn = new Function('input', functionCall(code));
+            const fn = new Function(
+                'input',
+                `
+                ${code}
+                ${functionCall}
+            `
+            );
             const result = fn(testCase.input);
 
             return {
@@ -44,55 +45,52 @@ function runJavaScriptLocally(code, testCases, problemId) {
 }
 
 export async function POST(req) {
-    const {
-        code,
-        language,
-        problemId,
-        testCases,
-        difficulty,
-        userId,
-        results: pythonResults,
-    } = await req.json();
+    const { code, language, problemId, userId, pythonResults } =
+        await req.json();
 
     try {
+        const client = await MongoClient.connect(process.env.MONGO_URI);
+        const db = client.db('PseudoAI');
+        const problem = await db
+            .collection('Problems')
+            .findOne({ id: problemId });
+
         let results;
         if (language === 'javascript') {
-            results = runJavaScriptLocally(code, testCases, problemId);
+            results = runJavaScriptLocally(
+                code,
+                problem.testCases,
+                problem.functionCalls[language]
+            );
         } else if (language === 'python') {
             results = pythonResults;
         }
 
         const allTestsPassed = results.every((result) => result.passed);
-
         if (allTestsPassed && userId) {
-            const client = await MongoClient.connect(process.env.MONGO_URI);
-            const db = client.db('PseudoAI');
             const Users = db.collection('Users');
-
-            // Only increment and add to solvedProblems if this problem hasn't been solved before
             await Users.updateOne(
                 {
                     clerkId: userId,
-                    'solvedProblems.problemId': { $ne: problemId }, // Check if problem hasn't been solved
+                    'solvedProblems.problemId': { $ne: problemId },
                 },
                 {
                     $inc: {
-                        [`problemsSolved.${difficulty.toLowerCase()}`]: 1,
+                        [`problemsSolved.${problem.difficulty.toLowerCase()}`]: 1,
                     },
                     $push: {
                         solvedProblems: {
                             problemId,
-                            difficulty,
+                            difficulty: problem.difficulty,
                             language,
                             solvedAt: new Date(),
                         },
                     },
                 }
             );
-
-            await client.close();
         }
 
+        await client.close();
         return new Response(JSON.stringify({ results }), { status: 200 });
     } catch (error) {
         return new Response(
