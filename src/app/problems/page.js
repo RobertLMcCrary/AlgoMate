@@ -11,10 +11,29 @@ export default function ProblemsPage() {
     const [filteredProblems, setFilteredProblems] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState('');
     const [selectedDifficulty, setSelectedDifficulty] = useState('');
+    const [showSolved, setShowSolved] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const { user } = useUser();
     const [userSolvedProblems, setUserSolvedProblems] = useState([]);
 
+    //fetching problems
+    useEffect(() => {
+        const fetchData = async () => {
+            const problemsResponse = await fetch('/api/problems');
+            const problemsData = await problemsResponse.json();
+            setProblems(problemsData);
+            setFilteredProblems(problemsData);
+
+            if (user?.id) {
+                const userResponse = await fetch(`/api/users/${user.id}`);
+                const userData = await userResponse.json();
+                setUserSolvedProblems(userData.solvedProblems || []);
+            }
+        };
+        fetchData();
+    }, [user?.id]);
+
+    //fetching solved problems
     useEffect(() => {
         const fetchData = async () => {
             const problemsResponse = await fetch('/api/problems');
@@ -33,7 +52,7 @@ export default function ProblemsPage() {
 
     //limiting # of problems on each page
     const [currentPage, setCurrentPage] = useState(1);
-    const problemsPerPage = 10;
+    const problemsPerPage = 15;
 
     // Calculate pagination values
     const indexOfLastProblem = currentPage * problemsPerPage;
@@ -78,8 +97,31 @@ export default function ProblemsPage() {
             );
         }
 
+        // Add solved filter
+        if (showSolved === 'solved') {
+            result = result.filter((problem) =>
+                userSolvedProblems.some(
+                    (solved) => solved.problemId === problem.id
+                )
+            );
+        } else if (showSolved === 'unsolved') {
+            result = result.filter(
+                (problem) =>
+                    !userSolvedProblems.some(
+                        (solved) => solved.problemId === problem.id
+                    )
+            );
+        }
+
         setFilteredProblems(result);
-    }, [problems, searchQuery, selectedTopic, selectedDifficulty]);
+    }, [
+        problems,
+        searchQuery,
+        selectedTopic,
+        selectedDifficulty,
+        showSolved,
+        userSolvedProblems,
+    ]);
 
     const resetFilters = () => {
         setSelectedTopic('');
@@ -115,12 +157,22 @@ export default function ProblemsPage() {
                         onChange={(e) => setSelectedTopic(e.target.value)}
                         className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700"
                     >
-                        <option value="All">All Topics</option>
+                        <option value="">All Topics</option>
                         {allTopics.map((topic) => (
                             <option key={topic} value={topic}>
                                 {topic}
                             </option>
                         ))}
+                    </select>
+
+                    <select
+                        value={showSolved}
+                        onChange={(e) => setShowSolved(e.target.value)}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+                    >
+                        <option value="all">All Problems</option>
+                        <option value="solved">Solved</option>
+                        <option value="unsolved">Unsolved</option>
                     </select>
                 </div>
 
@@ -142,7 +194,26 @@ export default function ProblemsPage() {
                                     key={problem._id}
                                     className="hover:bg-gray-700 transition-colors"
                                 >
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3 flex items-center gap-2">
+                                        {userSolvedProblems.some(
+                                            (solved) =>
+                                                solved.problemId === problem.id
+                                        ) && (
+                                            <span className="text-green-400">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-5 w-5"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </span>
+                                        )}
                                         {problem.title}
                                     </td>
                                     <td className="px-6 py-4">
