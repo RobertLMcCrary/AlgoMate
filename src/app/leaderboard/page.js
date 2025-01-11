@@ -7,13 +7,15 @@ import Link from 'next/link';
 
 function LeaderboardPage() {
     const [users, setUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 50;
 
     useEffect(() => {
         const fetchUsers = async () => {
             const response = await fetch('/api/users');
             const data = await response.json();
 
-            // Sort users by total problems solved
             const sortedUsers = data.sort((a, b) => {
                 const totalA =
                     a.problemsSolved.easy +
@@ -32,6 +34,17 @@ function LeaderboardPage() {
         fetchUsers();
     }, []);
 
+    // Filter users based on search query
+    const filteredUsers = users.filter((user) =>
+        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Calculate pagination
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
     return (
         <div className="bg-gray-900 text-white min-h-screen">
             <Navbar />
@@ -40,13 +53,28 @@ function LeaderboardPage() {
                     Leaderboard
                 </h1>
 
+                {/* Search Bar */}
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-purple-500"
+                    />
+                </div>
+
                 <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
                     <div className="divide-y divide-gray-700">
-                        {users.map((user, index) => {
+                        {currentUsers.map((user, index) => {
                             const totalSolved =
                                 user.problemsSolved.easy +
                                 user.problemsSolved.medium +
                                 user.problemsSolved.hard;
+                            const globalRank =
+                                users.findIndex(
+                                    (u) => u.clerkId === user.clerkId
+                                ) + 1;
 
                             return (
                                 <div
@@ -56,12 +84,16 @@ function LeaderboardPage() {
                                     <div className="flex items-center gap-6">
                                         <span
                                             className={`text-2xl font-bold ${
-                                                index === 0
+                                                globalRank === 1
                                                     ? 'text-yellow-400'
-                                                    : index === 1
+                                                    : globalRank === 2
+                                                    ? 'text-gray-400'
+                                                    : globalRank === 3
+                                                    ? 'text-amber-700'
+                                                    : ''
                                             }`}
                                         >
-                                            #{index + 1}
+                                            #{globalRank}
                                         </span>
 
                                         <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-xl font-bold">
@@ -82,7 +114,6 @@ function LeaderboardPage() {
                                             <h3 className="text-xl font-semibold">
                                                 {user.username}
                                             </h3>
-
                                             <div className="grid grid-cols-3 gap-4 mt-2 text-sm">
                                                 <span className="text-green-400">
                                                     Easy:{' '}
@@ -112,6 +143,33 @@ function LeaderboardPage() {
                             );
                         })}
                     </div>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="mt-6 flex justify-center gap-2">
+                    <button
+                        onClick={() =>
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+                    <span className="px-4 py-2">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() =>
+                            setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                            )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50"
+                    >
+                        Next
+                    </button>
                 </div>
             </div>
             <Footer />

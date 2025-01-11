@@ -26,6 +26,12 @@ import { indentUnit } from '@codemirror/language';
 //clerk user
 import { useUser } from '@clerk/nextjs';
 
+//uuid for collab room
+import { v4 as uuidv4 } from 'uuid';
+
+//toast for popup notifications
+import { toast } from 'react-hot-toast';
+
 export default function ProblemPage() {
     //fetching the problems
     const params = useParams();
@@ -107,6 +113,9 @@ export default function ProblemPage() {
                          8. Highlight edge cases: Encourage the user to consider and handle unusual scenarios, such as empty inputs or large datasets.
                          9. Dont give irrelevant information 
                          10. Again be concise there should never be more than a paragraph of text in all your responses.
+
+                         IMPORTANT NOTE: If the user asks for syntax help give them code snippets and explain how to do what ever they are asking.
+                         EXAMPLE: if a user forgets how to make an array in python with a specific length you can give them a code snippet on how to do it and explain it.
                          
                          Problem Context:
                          ${problem?.description}
@@ -171,8 +180,10 @@ export default function ProblemPage() {
         setResults(null);
 
         try {
+            // if language is javascript then code gets sent to backend
             if (selectedLanguage === 'javascript') {
                 console.log('Sending code to API:', code);
+                const stdout = [];
                 const res = await fetch('/api/code', {
                     method: 'POST',
                     headers: {
@@ -185,16 +196,24 @@ export default function ProblemPage() {
                         testCases: problem.testCases,
                         difficulty: problem.difficulty,
                         userId: user?.id,
+                        stdout: stdout,
                     }),
                 });
 
+                //backend executes js code and returns results
                 const data = await res.json();
                 console.log('Received response from API:', data);
 
                 setResults(data.results);
             } else if (selectedLanguage === 'python' && pyodide) {
+                //same logic as backend but just handled in frontend with pyodide instead of sandbox
                 const results = problem.testCases.map((testCase, index) => {
                     try {
+                        pyodide.runPython(`
+                            import sys
+                            import io
+                            sys.stdout = io.StringIO()
+                        `);
                         pyodide.globals.set('input', testCase.input);
                         pyodide.runPython(
                             code.trim() +
@@ -202,6 +221,9 @@ export default function ProblemPage() {
                                 problem.functionCalls[selectedLanguage]
                         );
                         const result = pyodide.globals.get('result');
+                        const stdout = pyodide.runPython(
+                            'sys.stdout.getvalue()'
+                        );
                         const jsResult =
                             result instanceof pyodide.ffi.PyProxy
                                 ? result.toJs()
@@ -215,16 +237,51 @@ export default function ProblemPage() {
                             input: testCase.input,
                             expected: testCase.output,
                             received: jsResult,
+                            stdout: stdout,
                         };
                     } catch (error) {
+                        /*
+                        const lineMatch = error.message.match(/line (\d+)/);
+                        const lineNumber = lineMatch ? lineMatch[1] : '';
+                        const errorMessage = error.message
+                            .split(':')
+                            .pop()
+                            .trim();
+
                         return {
                             testCase: index + 1,
                             passed: false,
-                            error: error.message,
+                            error: `Line ${lineNumber}: ${errorMessage}`,
                             input: testCase.input,
                             expected: testCase.output,
                             received: null,
+                            stdout: '',
                         };
+                        */
+
+                        // Extract line number from the last occurrence of "line" in the error message
+                        const lines = error.message.split('\n');
+                        for (let i = lines.length - 1; i >= 0; i--) {
+                            if (lines[i].includes('line')) {
+                                const match = lines[i].match(/line (\d+)/);
+                                if (match) {
+                                    const lineNumber = parseInt(match[1]); // Adjust for code execution offset
+                                    const errorMessage = error.message
+                                        .split(':')
+                                        .pop()
+                                        .trim();
+                                    return {
+                                        testCase: index + 1,
+                                        passed: false,
+                                        error: `Line ${lineNumber}: ${errorMessage}`,
+                                        input: testCase.input,
+                                        expected: testCase.output,
+                                        received: null,
+                                        stdout: '',
+                                    };
+                                }
+                            }
+                        }
                     }
                 });
 
@@ -399,6 +456,7 @@ export default function ProblemPage() {
                             <option value="python">Python</option>
                         </select>
                     </div>
+
                     <CodeMirror
                         value={code}
                         height="50vh"
@@ -438,6 +496,17 @@ export default function ProblemPage() {
                         }}
                     />
                     <div className="flex gap-2 mt-4">
+                        <button className="px-4 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition text-sm font-medium flex items-center gap-2">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                            </svg>
+                            Collaborate
+                        </button>
                         <button
                             onClick={runCode}
                             disabled={isRunning}
@@ -522,7 +591,10 @@ export default function ProblemPage() {
                                         <div className="text-sm mt-1">
                                             {result.error ? (
                                                 <div className="text-red-300">
-                                                    Error: {result.error}
+                                                    {result.error
+                                                        .split('\n')
+                                                        .pop()}{' '}
+                                                    {/* Only show last line of error */}
                                                 </div>
                                             ) : (
                                                 <>
@@ -546,6 +618,16 @@ export default function ProblemPage() {
                                                     </div>
                                                 </>
                                             )}
+                                        </div>
+                                    )}
+                                    {result.stdout && (
+                                        <div className="text-sm mt-2">
+                                            <div className="font-semibold">
+                                                Stdout:
+                                            </div>
+                                            <pre className="bg-gray-800 p-2 rounded mt-1 whitespace-pre-wrap">
+                                                {result.stdout}
+                                            </pre>
                                         </div>
                                     )}
                                 </div>

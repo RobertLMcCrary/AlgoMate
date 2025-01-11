@@ -14,6 +14,16 @@ const languageIds = {
 function runJavaScriptLocally(code, testCases, functionCall) {
     return testCases.map((testCase, index) => {
         try {
+            const stdout = [];
+            //create sandbox with modified console.log
+            const sandbox = {
+                console: {
+                    log: (...args) => stdout.push(args.join(' ')),
+                },
+            };
+
+            //create a new function with the users code and the function call
+            /*
             const fn = new Function(
                 'input',
                 `
@@ -21,7 +31,18 @@ function runJavaScriptLocally(code, testCases, functionCall) {
                 ${functionCall}
             `
             );
-            const result = fn(testCase.input);
+            */
+            const fn = new Function(
+                'input',
+                'sandbox',
+                `with (sandbox) {
+                    ${code}
+                    ${functionCall}
+                }`
+            );
+
+            //executes the function with the users code in it
+            const result = fn(testCase.input, sandbox);
 
             return {
                 testCase: index + 1,
@@ -30,6 +51,7 @@ function runJavaScriptLocally(code, testCases, functionCall) {
                 input: testCase.input,
                 expected: testCase.output,
                 received: result,
+                stdout: stdout.join('\n'),
             };
         } catch (error) {
             return {
@@ -39,12 +61,14 @@ function runJavaScriptLocally(code, testCases, functionCall) {
                 input: testCase.input,
                 expected: testCase.output,
                 received: null,
+                stdout: '',
             };
         }
     });
 }
 
 export async function POST(req) {
+    //python execution is all on frontend and test results get sent to backend
     const { code, language, problemId, userId, pythonResults } =
         await req.json();
 

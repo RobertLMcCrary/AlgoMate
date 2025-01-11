@@ -29,8 +29,8 @@ function Dashboard() {
 
     const totalSolved = userData
         ? (userData.problemsSolved?.easy || 0) +
-          (userData.problemsSolved?.medium || 0) +
-          (userData.problemsSolved?.hard || 0)
+        (userData.problemsSolved?.medium || 0) +
+        (userData.problemsSolved?.hard || 0)
         : 0;
 
     return (
@@ -109,6 +109,31 @@ function Dashboard() {
                         </Link>
                     </section>
                 </div>
+
+                {/* Connect with Users Section */}
+                <section className="bg-gray-800 py-12 px-6 rounded-3xl shadow-lg text-center mb-16 hover:bg-gray-700 transition">
+                    <h2 className="text-3xl font-bold mb-4">
+                        Connect with Fellow Coders
+                    </h2>
+                    <p className="text-xl text-gray-300 mb-8">
+                        Explore profiles, track progress, and see how you rank
+                        against other developers in our community.
+                    </p>
+                    <div className="flex justify-center gap-6">
+                        <Link
+                            href="/users"
+                            className="bg-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-500 transition"
+                        >
+                            Explore Users
+                        </Link>
+                        <Link
+                            href="/leaderboard"
+                            className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-500 transition"
+                        >
+                            View Leaderboard
+                        </Link>
+                    </div>
+                </section>
 
                 <section className="bg-gray-800 p-8 rounded-3xl shadow-xl mb-12 hover:bg-gray-700 transition">
                     <h3 className="text-3xl font-bold text-gray-100 mb-6">

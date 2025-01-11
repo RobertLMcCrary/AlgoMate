@@ -9,64 +9,8 @@ export default function SignUpPage() {
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!isLoaded) return;
-
-        try {
-            const result = await signUp.create({
-                emailAddress,
-                password,
-                username,
-            });
-
-            // Create user in Neo4j
-            const neo4jResponse = await fetch('/api/auth/create-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    clerkId: result.createdUserId,
-                    email: emailAddress,
-                    username: username,
-                }),
-            });
-
-            const neo4jResult = await neo4jResponse.json();
-            console.log('User created in Neo4j:', neo4jResult);
-
-            // Handle successful signup (redirect, etc.)
-        } catch (error) {
-            console.error('Signup error:', error);
-        }
-    };
-
-    const handleOAuthSignUp = async (OAuthStrategy) => {
-        try {
-            const result = await signUp.create({
-                strategy: strategy,
-            });
-
-            // Create user in Neo4j after OAuth signup
-            const neo4jResponse = await fetch('/api/auth/create-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    clerkId: result.createdUserId,
-                    email: result.emailAddress,
-                    username: result.username,
-                }),
-            });
-
-            const neo4jResult = await neo4jResponse.json();
-            console.log('User created in Neo4j:', neo4jResult);
-        } catch (error) {
-            console.error('OAuth Signup error:', error);
-        }
+    const handleSubmit = () => {
+        //logic for handling the submit on form
     };
 
     return (
@@ -80,7 +24,7 @@ export default function SignUpPage() {
                     {/* OAuth Buttons */}
                     <div className="space-y-4 mb-6">
                         <button
-                            onClick={() => handleOAuthSignUp('oauth_google')}
+                            onClick={() => alert('0Auth button pressed')}
                             className="w-full flex items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
                             <svg
@@ -109,7 +53,7 @@ export default function SignUpPage() {
                         </button>
 
                         <button
-                            onClick={() => handleOAuthSignUp('oauth_microsoft')}
+                            onClick={() => alert('0Auth button pressed')}
                             className="w-full flex items-center justify-center bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
                             <svg
