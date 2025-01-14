@@ -140,6 +140,16 @@ export default function ProblemsPage() {
             <div className="max-w-7xl mx-auto py-8 px-4">
                 <h1 className="text-3xl font-bold text-white mb-8">Problems</h1>
 
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search problems by title or topic..."
+                        className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-purple-500"
+                    />
+                </div>
+
                 <div className="flex gap-4 mb-6">
                     <select
                         value={selectedDifficulty}
@@ -199,32 +209,33 @@ export default function ProblemsPage() {
                                             (solved) =>
                                                 solved.problemId === problem.id
                                         ) && (
-                                                <span className="text-green-400">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        className="h-5 w-5"
-                                                        viewBox="0 0 20 20"
-                                                        fill="currentColor"
-                                                    >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </span>
-                                            )}
+                                            <span className="text-green-400">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-5 w-5"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </span>
+                                        )}
                                         {problem.title}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`px-2 py-1 rounded-full text-sm ${problem.difficulty === 'Easy'
-                                                ? 'bg-green-600'
-                                                : problem.difficulty ===
-                                                    'Medium'
+                                            className={`px-2 py-1 rounded-full text-sm ${
+                                                problem.difficulty === 'Easy'
+                                                    ? 'bg-green-600'
+                                                    : problem.difficulty ===
+                                                      'Medium'
                                                     ? 'bg-yellow-600'
                                                     : 'bg-red-600'
-                                                }`}
+                                            }`}
                                         >
                                             {problem.difficulty}
                                         </span>

@@ -376,16 +376,16 @@ export default function ProblemPage() {
     };
 
     return (
-        <div className="h-[100vh] bg-gray-800 overflow-y-auto">
+        <div className="h-[100vh] bg-gray-800">
             <PanelGroup
                 direction="horizontal"
-                className="flex bg-gray-800 h-screen"
+                className="flex bg-gray-800 h-[100vh]"
             >
                 {/* Problem Section */}
                 <Panel
                     defaultSize={25}
                     minSize={20}
-                    className="w-1/4 bg-gray-800 text-gray-200 p-6 overflow-y-auto"
+                    className="w-1/4 bg-gray-800 text-gray-200 p-6 h-[100vh] overflow-y-auto"
                 >
                     <Link
                         className="text-blue-500 hover:underline"
