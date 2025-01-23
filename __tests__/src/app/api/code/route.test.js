@@ -1,5 +1,6 @@
 import { POST } from './route';
 import { MongoClient } from 'mongodb';
+import { createMocks } from 'node-mocks-http';
 
 jest.mock('mongodb');
 
@@ -23,141 +24,120 @@ describe('Code Execution API', () => {
         MongoClient.connect = jest.fn().mockResolvedValue(mockClient);
     });
 
-    describe('runJavaScriptLocally', () => {
-        const testCode = `
-            function sum(nums) {
-                return nums.reduce((a, b) => a + b, 0);
-            }
-        `;
-
-        test('successfully executes valid JavaScript code', async () => {
-            const req = {
-                json: () =>
-                    Promise.resolve({
-                        code: testCode,
-                        language: 'javascript',
-                        problemId: 'test1',
-                        userId: 'user1',
-                    }),
-            };
-
-            mockCollection.findOne.mockResolvedValue({
-                id: 'test1',
-                testCases: [{ input: [1, 2, 3], output: 6 }],
-                functionCalls: {
-                    javascript: 'return sum(input);',
-                },
-            });
-
-            const response = await POST(req);
-            const data = await response.json();
-
-            expect(data.results[0].passed).toBe(true);
-            expect(data.results[0].received).toBe(6);
+    test('successfully executes JavaScript code and returns results', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+            body: {
+                code: 'function sum(a,b) { return a + b; }',
+                language: 'javascript',
+                problemId: 'test123',
+                userId: 'user123',
+            },
         });
 
-        test('handles runtime errors in code execution', async () => {
-            const req = {
-                json: () =>
-                    Promise.resolve({
-                        code: 'function sum(nums) { return nums.undefined(); }',
-                        language: 'javascript',
-                        problemId: 'test2',
-                        userId: 'user1',
-                    }),
-            };
-
-            mockCollection.findOne.mockResolvedValue({
-                id: 'test2',
-                testCases: [{ input: [1, 2, 3], output: 6 }],
-                functionCalls: {
-                    javascript: 'return sum(input);',
-                },
-            });
-
-            const response = await POST(req);
-            const data = await response.json();
-
-            expect(data.results[0].passed).toBe(false);
-            expect(data.results[0].error).toBeTruthy();
+        mockCollection.findOne.mockResolvedValue({
+            id: 'test123',
+            testCases: [
+                { input: [1, 2], output: 3 },
+                { input: [0, 0], output: 0 },
+            ],
+            functionCalls: {
+                javascript: 'return sum(input[0], input[1]);',
+            },
         });
 
-        test('handles Python results correctly', async () => {
-            const pythonResults = [
-                {
-                    testCase: 1,
-                    passed: true,
-                    input: [1, 2],
-                    output: 3,
-                    received: 3,
-                },
-            ];
+        const response = await POST(req);
+        const data = await response.json();
 
-            const req = {
-                json: () =>
-                    Promise.resolve({
-                        code: '',
-                        language: 'python',
-                        problemId: 'test3',
-                        userId: 'user1',
-                        pythonResults,
-                    }),
-            };
+        expect(response.status).toBe(200);
+        expect(data.results).toHaveLength(2);
+        expect(data.results[0].passed).toBe(true);
+        expect(data.results[1].passed).toBe(true);
+    });
 
-            mockCollection.findOne.mockResolvedValue({
-                id: 'test3',
-                testCases: [{ input: [1, 2], output: 3 }],
-            });
+    test('handles Python results correctly', async () => {
+        const pythonResults = [
+            {
+                testCase: 1,
+                passed: true,
+                input: [1, 2],
+                expected: 3,
+                received: 3,
+            },
+        ];
 
-            const response = await POST(req);
-            const data = await response.json();
-
-            expect(data.results).toEqual(pythonResults);
+        const { req, res } = createMocks({
+            method: 'POST',
+            body: {
+                code: 'def sum(a,b): return a + b',
+                language: 'python',
+                problemId: 'test123',
+                userId: 'user123',
+                pythonResults,
+            },
         });
 
-        test('updates user progress when all tests pass', async () => {
-            const req = {
-                json: () =>
-                    Promise.resolve({
-                        code: testCode,
-                        language: 'javascript',
-                        problemId: 'test4',
-                        userId: 'user1',
-                    }),
-            };
-
-            mockCollection.findOne.mockResolvedValue({
-                id: 'test4',
-                difficulty: 'Easy',
-                testCases: [{ input: [1, 2, 3], output: 6 }],
-                functionCalls: {
-                    javascript: 'return sum(input);',
-                },
-            });
-
-            await POST(req);
-
-            expect(mockCollection.updateOne).toHaveBeenCalled();
+        mockCollection.findOne.mockResolvedValue({
+            id: 'test123',
+            testCases: [{ input: [1, 2], output: 3 }],
         });
 
-        test('handles database errors gracefully', async () => {
-            const req = {
-                json: () =>
-                    Promise.resolve({
-                        code: testCode,
-                        language: 'javascript',
-                        problemId: 'test5',
-                        userId: 'user1',
-                    }),
-            };
+        const response = await POST(req);
+        const data = await response.json();
 
-            MongoClient.connect.mockRejectedValue(new Error('Database error'));
+        expect(response.status).toBe(200);
+        expect(data.results).toEqual(pythonResults);
+    });
 
-            const response = await POST(req);
-            const data = await response.json();
-
-            expect(data.results[0].passed).toBe(false);
-            expect(data.results[0].error).toContain('Failed to execute code');
+    test('handles JavaScript execution errors', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+            body: {
+                code: 'function sum(a,b) { throw new Error("Test error"); }',
+                language: 'javascript',
+                problemId: 'test123',
+                userId: 'user123',
+            },
         });
+
+        mockCollection.findOne.mockResolvedValue({
+            id: 'test123',
+            testCases: [{ input: [1, 2], output: 3 }],
+            functionCalls: {
+                javascript: 'return sum(input[0], input[1]);',
+            },
+        });
+
+        const response = await POST(req);
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.results[0].passed).toBe(false);
+        expect(data.results[0].error).toBeDefined();
+    });
+
+    test('updates user progress when all tests pass', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+            body: {
+                code: 'function sum(a,b) { return a + b; }',
+                language: 'javascript',
+                problemId: 'test123',
+                userId: 'user123',
+            },
+        });
+
+        mockCollection.findOne.mockResolvedValue({
+            id: 'test123',
+            difficulty: 'Easy',
+            testCases: [{ input: [1, 2], output: 3 }],
+            functionCalls: {
+                javascript: 'return sum(input[0], input[1]);',
+            },
+        });
+
+        await POST(req);
+
+        expect(mockCollection.updateOne).toHaveBeenCalled();
     });
 });

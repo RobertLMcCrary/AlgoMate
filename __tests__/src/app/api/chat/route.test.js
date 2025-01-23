@@ -1,5 +1,5 @@
 const { HfInference } = require('@huggingface/inference');
-const { POST } = require('../../../../src/app/api/chat/route');
+const { POST } = require('@/app/api/chat/route');
 
 jest.mock('@huggingface/inference');
 
