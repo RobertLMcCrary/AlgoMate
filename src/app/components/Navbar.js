@@ -102,7 +102,11 @@ function Navbar() {
                                 Contact
                             </span>
                         </Link>
-                        <SignInButton className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition">
+                        <SignInButton
+                            mode="modal"
+                            forceRedirectUrl="/sign-in"
+                            className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition"
+                        >
                             Sign In
                         </SignInButton>
                     </div>

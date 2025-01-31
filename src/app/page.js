@@ -31,7 +31,11 @@ function Home() {
                         hints and pseudo code to keep you focused.
                     </p>
                     <div className="flex justify-center items-center gap-4">
-                        <SignUpButton className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition">
+                        <SignUpButton
+                            mode="modal"
+                            forceRedirectUrl="/signup"
+                            className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition"
+                        >
                             Sign Up Now
                         </SignUpButton>
                         <Link href="/about">
@@ -65,15 +69,15 @@ function Home() {
                     </section>
 
                     {/* Coming Soon Section */}
-                    <section className="bg-gradient-to-r from-blue-500 to-purple-700 text-white py-12 px-6 rounded-lg shadow-lg mb-16">
+                    <section className="bg-gray-800 text-white py-12 px-6 rounded-lg shadow-lg mb-16">
                         <h2 className="text-4xl font-bold mb-4">
                             Coming Soon: PseudoAI Pro
                         </h2>
                         <p className="text-xl text-gray-200 mb-6">
                             Take your interview prep to the next level with
-                            **PseudoAI Pro**. Collaborate live with others,
-                            tackle mock interviews with video calling and chat,
-                            and solve problems together in real time!
+                            PseudoAI Pro. Collaborate live with others, tackle
+                            mock interviews with video calling and chat, and
+                            solve problems together in real time!
                         </p>
                         <div className="flex justify-center font-bold text-xl">
                             <ul className="list-disc text-left space-y-4">
@@ -101,27 +105,30 @@ function Home() {
                         <div className="flex justify-center mt-8">
                             <Link
                                 href="/pricing"
-                                className="cursor-pointer bg-gray-800 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-700 transition"
+                                className="cursor-pointer bg-gradient-to-r from-blue-500 to-purple-700  text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-700 transition"
                             >
                                 Learn More
                             </Link>
                         </div>
                     </section>
 
-                    {/* Sign Up Call to action */}
-                    <section className="bg-gray-800 py-12 px-4 rounded-lg shadow-lg text-center">
-                        <h3 className="text-2xl font-semibold mb-4">
-                            Ready to Level Up?
-                        </h3>
-                        <p className="text-gray-400 mb-6">
-                            Join other users already mastering coding
-                            interviews.
+                    {/* Practice Problems Section */}
+                    <div className="mt-8 bg-gray-800 rounded-lg p-8 text-center">
+                        <h2 className="text-3xl font-bold mb-4">
+                            Ready for More Practice?
+                        </h2>
+                        <p className="text-xl text-gray-200 mb-6">
+                            Explore our curated collection of coding problems
+                            ranging from easy to hard. Practice with our AI
+                            assistant and track your progress.
                         </p>
-
-                        <SignUpButton className="bg-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-500 transition">
-                            Get Started for Free
-                        </SignUpButton>
-                    </section>
+                        <Link
+                            href="/problems"
+                            className="inline-block bg-gradient-to-r from-blue-500 to-purple-700  text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-700 transition"
+                        >
+                            View Problem Database
+                        </Link>
+                    </div>
                 </main>
             </SignedOut>
             <Footer />

@@ -21,8 +21,8 @@ import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorView } from '@codemirror/view';
-import { indentUnit } from '@codemirror/language';
 
+import { indentUnit } from '@codemirror/language';
 //clerk user
 import { useUser } from '@clerk/nextjs';
 
@@ -46,7 +46,7 @@ export default function ProblemPage() {
     const [code, setCode] = useState('');
     const [isRunning, setIsRunning] = useState(false);
     const [results, setResults] = useState(null);
-    const [selectedLanguage, setSelectedLanguage] = useState('javascript');
+    const [selectedLanguage, setSelectedLanguage] = useState('python');
     //state management for pyodide
     const [pyodide, setPyodide] = useState(null);
     //user for update user progress
@@ -174,56 +174,71 @@ export default function ProblemPage() {
         }
     };
 
-    //running code in the code editor
     const runCode = async () => {
         setIsRunning(true);
         setResults(null);
 
         try {
-            // if language is javascript then code gets sent to backend
+            // Fetch the problem document to get functionCalls and testCases
+            const res = await fetch(`/api/problems/${params.id}`);
+            const problem = await res.json();
+
+            if (!problem) {
+                throw new Error('Problem not found');
+            }
+
+            const functionCall = problem.functionCalls[selectedLanguage];
+            if (!functionCall) {
+                throw new Error(
+                    `Function call not found for language: ${selectedLanguage}`
+                );
+            }
+
+            let results;
+
+            // JavaScript Execution
             if (selectedLanguage === 'javascript') {
-                console.log('Sending code to API:', code);
-                const stdout = [];
                 const res = await fetch('/api/code', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         code,
                         language: selectedLanguage,
                         problemId: problem.id,
-                        testCases: problem.testCases,
-                        difficulty: problem.difficulty,
                         userId: user?.id,
-                        stdout: stdout,
                     }),
                 });
 
-                //backend executes js code and returns results
-                const data = await res.json();
-                console.log('Received response from API:', data);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
 
-                setResults(data.results);
-            } else if (selectedLanguage === 'python' && pyodide) {
-                //same logic as backend but just handled in frontend with pyodide instead of sandbox
-                const results = problem.testCases.map((testCase, index) => {
+                const data = await res.json();
+                results = data.results;
+            }
+
+            // Python Execution (using Pyodide)
+            else if (selectedLanguage === 'python' && pyodide) {
+                results = problem.testCases.map((testCase, index) => {
                     try {
+                        // Redirect stdout to capture console logs
                         pyodide.runPython(`
                             import sys
                             import io
                             sys.stdout = io.StringIO()
                         `);
+
+                        // Set input and execute the code
                         pyodide.globals.set('input', testCase.input);
-                        pyodide.runPython(
-                            code.trim() +
-                                '\n' +
-                                problem.functionCalls[selectedLanguage]
-                        );
+                        pyodide.runPython(code.trim() + '\n' + functionCall);
+
+                        // Get the result and stdout
                         const result = pyodide.globals.get('result');
                         const stdout = pyodide.runPython(
                             'sys.stdout.getvalue()'
                         );
+
+                        // Convert PyProxy to JavaScript if necessary
                         const jsResult =
                             result instanceof pyodide.ffi.PyProxy
                                 ? result.toJs()
@@ -240,32 +255,13 @@ export default function ProblemPage() {
                             stdout: stdout,
                         };
                     } catch (error) {
-                        /*
-                        const lineMatch = error.message.match(/line (\d+)/);
-                        const lineNumber = lineMatch ? lineMatch[1] : '';
-                        const errorMessage = error.message
-                            .split(':')
-                            .pop()
-                            .trim();
-
-                        return {
-                            testCase: index + 1,
-                            passed: false,
-                            error: `Line ${lineNumber}: ${errorMessage}`,
-                            input: testCase.input,
-                            expected: testCase.output,
-                            received: null,
-                            stdout: '',
-                        };
-                        */
-
-                        // Extract line number from the last occurrence of "line" in the error message
+                        // Extract line number and error message
                         const lines = error.message.split('\n');
                         for (let i = lines.length - 1; i >= 0; i--) {
                             if (lines[i].includes('line')) {
                                 const match = lines[i].match(/line (\d+)/);
                                 if (match) {
-                                    const lineNumber = parseInt(match[1]); // Adjust for code execution offset
+                                    const lineNumber = parseInt(match[1]);
                                     const errorMessage = error.message
                                         .split(':')
                                         .pop()
@@ -288,9 +284,7 @@ export default function ProblemPage() {
                 // Send Python results to backend for user progress update
                 const res = await fetch('/api/code', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         code,
                         language: selectedLanguage,
@@ -300,10 +294,35 @@ export default function ProblemPage() {
                     }),
                 });
 
-                setResults(results);
+                const data = await res.json();
+                results = data.results;
             }
+
+            // Java or C++ Execution (using Judge0)
+            else if (['java', 'cpp'].includes(selectedLanguage)) {
+                const res = await fetch('/api/code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code,
+                        language: selectedLanguage,
+                        problemId: problem.id,
+                        userId: user?.id,
+                    }),
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const data = await res.json();
+                results = data.results;
+            }
+
+            // Set the results in state
+            setResults(results);
         } catch (error) {
-            console.error('Frontend error:', error);
+            console.error('Error in runCode function:', error);
             setResults([
                 {
                     testCase: 'Error',
@@ -323,11 +342,11 @@ export default function ProblemPage() {
             const systemMessage = {
                 role: 'system',
                 content: `Generate only pseudocode for the following problem. Do not include any introductory text - provide only the pseudocode steps.
-                         
-                         Problem: "${problem?.title}"
-                         ${problem?.description}
-                         Difficulty: ${problem?.difficulty}
-                         Topics: ${problem?.topics}`,
+                     
+                     Problem: "${problem?.title}"
+                     ${problem?.description}
+                     Difficulty: ${problem?.difficulty}
+                     Topics: ${problem?.topics}`,
             };
 
             const userMessage = {
@@ -454,6 +473,10 @@ export default function ProblemPage() {
                         >
                             <option value="javascript">JavaScript</option>
                             <option value="python">Python</option>
+                            {/*
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            */}
                         </select>
                     </div>
 

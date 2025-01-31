@@ -28,51 +28,11 @@ function InterviewPage() {
     const [pyodide, setPyodide] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
     const [mounted, setMounted] = useState(false);
-    //timer and grading for the interview
-    const [timeElapsed, setTimeElapsed] = useState(0);
-    const [isInterviewComplete, setIsInterviewComplete] = useState(false);
-    const [grade, setGrade] = useState(null);
-    const [interviewMetrics, setInterviewMetrics] = useState({
-        technicalAccuracy: 0,
-        problemSolving: 0,
-        communication: 0,
-        codeQuality: 0,
-    });
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeElapsed((prev) => prev + 1);
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
-
-    const calculateGrade = () => {
-        const totalScore =
-            (interviewMetrics.technicalAccuracy +
-                interviewMetrics.problemSolving +
-                interviewMetrics.communication +
-                interviewMetrics.codeQuality) /
-            4;
-
-        if (totalScore >= 90) return 'A';
-        if (totalScore >= 80) return 'B';
-        if (totalScore >= 70) return 'C';
-        if (totalScore >= 60) return 'D';
-        return 'F';
-    };
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    //pre prompting for the ai interviewer
     const [systemMessage, setSystemMessage] = useState({
         role: 'system',
         content: `You are an AI technical interviewer conducting a coding interview. 
@@ -90,14 +50,6 @@ function InterviewPage() {
         11. If the user asks questions related to the challenge given, do not adjust the challenge, just answer the questions and to help them understand the task.
         12. DO NOT give code snippets that could give away the solution.
 
-        Additionally, evaluate the candidate on:
-        1. Technical Accuracy (0-100)
-        2. Problem Solving Approach (0-100)
-        3. Communication Skills (0-100)
-        4. Code Quality (0-100)
-        
-        Update these metrics after each significant interaction.
-
         You are a an interviewer conducting a coding interview so treat it as serious as possible.
         Start off with questions getting to know the candidate's experience level. 
         Then flow into the coding portion of the interview after you get to know the candidate's experience level.
@@ -107,7 +59,6 @@ function InterviewPage() {
         Code output: ${output}`,
     });
 
-    //loading the pyodide instance for python execution
     useEffect(() => {
         if (selectedLanguage === 'python' && !pyodide) {
             const loadPyodide = async () => {
@@ -148,9 +99,8 @@ function InterviewPage() {
                 // Update system message with new output
                 setSystemMessage((prev) => ({
                     ...prev,
-                    content: `${
-                        prev.content.split('Code output:')[0]
-                    }Code output: ${output.join('\n')}`,
+                    content: `${prev.content.split('Code output:')[0]
+                        }Code output: ${output.join('\n')}`,
                 }));
             } catch (error) {
                 setOutput('Error: ' + error.message);
@@ -170,9 +120,8 @@ function InterviewPage() {
                 // Update system message with new output
                 setSystemMessage((prev) => ({
                     ...prev,
-                    content: `${
-                        prev.content.split('Code output:')[0]
-                    }Code output: ${stdout}`,
+                    content: `${prev.content.split('Code output:')[0]
+                        }Code output: ${stdout}`,
                 }));
             } catch (error) {
                 setOutput('Error: ' + error.message);
@@ -240,27 +189,9 @@ function InterviewPage() {
         <div className="bg-gray-900 min-h-screen text-white">
             <Navbar />
             <div className="max-w-7xl mx-auto py-8 px-4">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-lg shadow-lg">
-                    <h1 className="text-4xl font-bold text-purple-400">
-                        Technical Interview
-                    </h1>
-                    <div className="flex items-center gap-4">
-                        <span className="text-purple-400 text-lg">
-                            Time: {formatTime(timeElapsed)}
-                        </span>
-                        {!isInterviewComplete && (
-                            <button
-                                onClick={() => {
-                                    setIsInterviewComplete(true);
-                                    setGrade(calculateGrade());
-                                }}
-                                className="px-4 py-1.5 bg-red-600 text-white rounded hover:bg-red-500 transition"
-                            >
-                                End Interview
-                            </button>
-                        )}
-                    </div>
-                </div>
+                <h1 className="text-4xl font-bold text-center mb-8 text-purple-400">
+                    Technical Interview
+                </h1>
 
                 <div className="grid grid-cols-2 gap-6 bg-gray-800 p-6 rounded-lg shadow-xl">
                     {/* Code Editor Section */}
@@ -301,11 +232,10 @@ function InterviewPage() {
                                 setCode(value);
                                 setSystemMessage((prev) => ({
                                     ...prev,
-                                    content: `${
-                                        prev.content.split(
-                                            'Current code in editor:'
-                                        )[0]
-                                    }Current code in editor: ${value}`,
+                                    content: `${prev.content.split(
+                                        'Current code in editor:'
+                                    )[0]
+                                        }Current code in editor: ${value}`,
                                 }));
                             }}
                             className="overflow-hidden rounded-lg border border-gray-700"
@@ -358,11 +288,10 @@ function InterviewPage() {
                             {messages.map((message, index) => (
                                 <div
                                     key={index}
-                                    className={`p-4 rounded-lg ${
-                                        message.role === 'user'
-                                            ? 'bg-purple-900/50 ml-auto max-w-[80%]'
-                                            : 'bg-gray-700 max-w-[80%]'
-                                    }`}
+                                    className={`p-4 rounded-lg ${message.role === 'user'
+                                        ? 'bg-purple-900/50 ml-auto max-w-[80%]'
+                                        : 'bg-gray-700 max-w-[80%]'
+                                        }`}
                                 >
                                     <ReactMarkdown
                                         className="prose prose-invert max-w-none"

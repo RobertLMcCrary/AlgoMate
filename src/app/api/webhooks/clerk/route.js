@@ -38,6 +38,7 @@ export async function POST(req) {
             },
             solvedProblems: [],
             friends: [],
+            notes: {},
         });
     }
     await client.close();
