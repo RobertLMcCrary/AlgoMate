@@ -26,6 +26,7 @@ export async function POST(req) {
         await Users.insertOne({
             clerkId: id,
             email: email_addresses[0].email_address,
+            visibility: true,
             username:
                 evt.data.username ||
                 email_addresses[0].email_address.split('@')[0],
@@ -38,7 +39,7 @@ export async function POST(req) {
             },
             solvedProblems: [],
             friends: [],
-            notes: {},
+            notes: [],
         });
     }
     await client.close();

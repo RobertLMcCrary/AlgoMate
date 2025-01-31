@@ -12,6 +12,8 @@ import {
 } from '@clerk/nextjs';
 import { useAuth } from '@clerk/nextjs';
 
+import { Toaster } from 'react-hot-toast';
+
 const geistSans = localFont({
     src: './fonts/GeistVF.woff',
     variable: '--font-geist-sans',
@@ -39,6 +41,7 @@ export default function RootLayout({ children }) {
                 <body
                     className={`${geistSans.variable} ${geistMono.variable} antialiased`}
                 >
+                    <Toaster position="top-right" />
                     {children}
                     <Analytics />
                     <script

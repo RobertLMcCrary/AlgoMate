@@ -26,9 +26,6 @@ import { indentUnit } from '@codemirror/language';
 //clerk user
 import { useUser } from '@clerk/nextjs';
 
-//uuid for collab room
-import { v4 as uuidv4 } from 'uuid';
-
 //toast for popup notifications
 import { toast } from 'react-hot-toast';
 
@@ -47,11 +44,24 @@ export default function ProblemPage() {
     const [isRunning, setIsRunning] = useState(false);
     const [results, setResults] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState('python');
+    //state management for teh tabs
+    const [activeTab, setActiveTab] = useState('code');
+    const [notes, setNotes] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
     //state management for pyodide
     const [pyodide, setPyodide] = useState(null);
     //user for update user progress
     const { user } = useUser();
 
+    //language map for selecting language
+    const languageMap = {
+        javascript: javascript({ jsx: true }),
+        python: python(),
+        java: java(),
+        cpp: cpp(),
+    };
+
+    //initialize pyodide
     useEffect(() => {
         if (selectedLanguage === 'python' && !pyodide) {
             const loadPyodide = async () => {
@@ -64,14 +74,7 @@ export default function ProblemPage() {
         }
     }, [selectedLanguage, pyodide]);
 
-    //language map for selecting language
-    const languageMap = {
-        javascript: javascript({ jsx: true }),
-        python: python(),
-        java: java(),
-        cpp: cpp(),
-    };
-
+    //load the start code templates for the problem
     useEffect(() => {
         if (problem && problem.starterCodes) {
             setCode(problem.starterCodes[selectedLanguage]);
@@ -95,6 +98,49 @@ export default function ProblemPage() {
         }
     }, [params.id]);
 
+    //fetch the notes for the current problem when the page loads
+    useEffect(() => {
+        if (user && problem) {
+            fetch(`/api/users/${user.id}/notes/${problem.id}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    setNotes(data.note || '');
+                })
+                .catch((error) =>
+                    console.error('Error fetching notes:', error)
+                );
+        }
+    }, [user, problem]);
+
+    const saveNotes = async () => {
+        if (user && problem) {
+            setIsSaving(true);
+            try {
+                const response = await fetch(
+                    `/api/users/${user.id}/notes/${problem.id}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ notes }),
+                    }
+                );
+
+                if (response.ok) {
+                    toast.success('Notes saved successfully!');
+                } else {
+                    toast.error('Failed to save notes');
+                }
+            } catch (error) {
+                console.error('Error saving notes:', error);
+                toast.error('Error saving notes');
+            } finally {
+                setIsSaving(false);
+            }
+        }
+    };
+
     const handleUserInput = async (e) => {
         e.preventDefault();
         if (userInput.trim()) {
@@ -116,6 +162,8 @@ export default function ProblemPage() {
 
                          IMPORTANT NOTE: If the user asks for syntax help give them code snippets and explain how to do what ever they are asking.
                          EXAMPLE: if a user forgets how to make an array in python with a specific length you can give them a code snippet on how to do it and explain it.
+
+                         If the user asks for pseudo code provide it, don't be specific with syntax and keep the pseudo code simple.
                          
                          Problem Context:
                          ${problem?.description}
@@ -459,202 +507,388 @@ export default function ProblemPage() {
                     minSize={30}
                     className="w-[50vw] bg-gray-800 p-6 flex flex-col h-full"
                 >
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold text-purple-400">
-                            Code Editor
-                        </h2>
-                        <select
-                            value={selectedLanguage}
-                            onChange={(e) =>
-                                setSelectedLanguage(e.target.value)
-                            }
-                            className="bg-gray-700 text-gray-200 px-3 py-1.5 rounded border border-gray-600 
-                                 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    {/* Tabbing System */}
+                    <div className="flex gap-2 mb-4">
+                        <button
+                            onClick={() => setActiveTab('code')}
+                            className={`px-4 py-2 rounded ${
+                                activeTab === 'code'
+                                    ? 'bg-purple-700 text-white'
+                                    : 'bg-gray-700 text-gray-200'
+                            }`}
                         >
-                            <option value="javascript">JavaScript</option>
-                            <option value="python">Python</option>
-                            {/*
-                            <option value="java">Java</option>
-                            <option value="cpp">C++</option>
-                            */}
-                        </select>
-                    </div>
-
-                    <CodeMirror
-                        value={code}
-                        height="50vh"
-                        theme={vscodeDark}
-                        extensions={[languageMap[selectedLanguage]]}
-                        onChange={(value) => setCode(value)}
-                        className="overflow-hidden text-black rounded-lg border border-gray-700"
-                        basicSetup={{
-                            lineNumbers: true,
-                            highlightActiveLineGutter: true,
-                            highlightSpecialChars: true,
-                            history: true,
-                            foldGutter: true,
-                            drawSelection: true,
-                            dropCursor: true,
-                            allowMultipleSelections: true,
-                            indentOnInput: true,
-                            syntaxHighlighting: true,
-                            bracketMatching: true,
-                            closeBrackets: true,
-                            autocompletion: true,
-                            rectangularSelection: true,
-                            crosshairCursor: true,
-                            highlightActiveLine: true,
-                            highlightSelectionMatches: true,
-                            closeBracketsKeymap: true,
-                            defaultKeymap: true,
-                            searchKeymap: true,
-                            historyKeymap: true,
-                            foldKeymap: true,
-                            completionKeymap: true,
-                            lintKeymap: true,
-                        }}
-                        style={{
-                            fontSize: '14px',
-                            backgroundColor: '#1e1e1e',
-                        }}
-                    />
-                    <div className="flex gap-2 mt-4">
-                        <button className="px-4 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition text-sm font-medium flex items-center gap-2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                            >
-                                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                            </svg>
-                            Collaborate
+                            Code Editor
                         </button>
                         <button
-                            onClick={runCode}
-                            disabled={isRunning}
-                            className="flex-1 bg-purple-700 text-white px-6 py-2.5 rounded shadow 
+                            onClick={() => setActiveTab('ai')}
+                            className={`px-4 py-2 rounded ${
+                                activeTab === 'ai'
+                                    ? 'bg-purple-700 text-white'
+                                    : 'bg-gray-700 text-gray-200'
+                            }`}
+                        >
+                            AI Assistant
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('notes')}
+                            className={`px-4 py-2 rounded ${
+                                activeTab === 'notes'
+                                    ? 'bg-purple-700 text-white'
+                                    : 'bg-gray-700 text-gray-200'
+                            }`}
+                        >
+                            Notes
+                        </button>
+                    </div>
+
+                    {/* Render Active Tab */}
+                    {activeTab === 'code' && (
+                        <div>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-purple-400">
+                                    Code Editor
+                                </h2>
+                                <select
+                                    value={selectedLanguage}
+                                    onChange={(e) =>
+                                        setSelectedLanguage(e.target.value)
+                                    }
+                                    className="bg-gray-700 text-gray-200 px-3 py-1.5 rounded border border-gray-600 
+                             focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    <option value="javascript">
+                                        JavaScript
+                                    </option>
+                                    <option value="python">Python</option>
+                                </select>
+                            </div>
+
+                            <CodeMirror
+                                value={code}
+                                height="50vh"
+                                theme={vscodeDark}
+                                extensions={[
+                                    selectedLanguage === 'javascript'
+                                        ? javascript({ jsx: true })
+                                        : python(),
+                                ]}
+                                onChange={(value) => setCode(value)}
+                                className="overflow-hidden text-black rounded-lg border border-gray-700"
+                                basicSetup={{
+                                    lineNumbers: true,
+                                    highlightActiveLineGutter: true,
+                                    highlightSpecialChars: true,
+                                    history: true,
+                                    foldGutter: true,
+                                    drawSelection: true,
+                                    dropCursor: true,
+                                    allowMultipleSelections: true,
+                                    indentOnInput: true,
+                                    syntaxHighlighting: true,
+                                    bracketMatching: true,
+                                    closeBrackets: true,
+                                    autocompletion: true,
+                                    rectangularSelection: true,
+                                    crosshairCursor: true,
+                                    highlightActiveLine: true,
+                                    highlightSelectionMatches: true,
+                                    closeBracketsKeymap: true,
+                                    defaultKeymap: true,
+                                    searchKeymap: true,
+                                    historyKeymap: true,
+                                    foldKeymap: true,
+                                    completionKeymap: true,
+                                    lintKeymap: true,
+                                }}
+                                style={{
+                                    fontSize: '14px',
+                                    backgroundColor: '#1e1e1e',
+                                }}
+                            />
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    onClick={runCode}
+                                    disabled={isRunning}
+                                    className="flex-1 bg-purple-700 text-white px-6 py-2.5 rounded shadow 
                      hover:bg-purple-600 transition disabled:opacity-50 
                      font-medium text-sm"
-                        >
-                            {isRunning ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg
-                                        className="animate-spin h-5 w-5"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                            fill="none"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
-                                    </svg>
-                                    Running...
-                                </span>
-                            ) : (
-                                'Run Code'
-                            )}
-                        </button>
-                        <button
-                            onClick={generatePseudoCode}
-                            className="px-4 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition text-sm font-medium"
-                        >
-                            {loading ? 'Thinking...' : 'Generate Pseudo Code'}
-                        </button>
-                        <button
-                            onClick={() =>
-                                setCode(problem?.starterCodes[selectedLanguage])
-                            }
-                            className="px-4 py-2.5 rounded border border-gray-600 text-gray-300 
-                     hover:bg-gray-700 transition text-sm font-medium"
-                        >
-                            Reset Code
-                        </button>
-                    </div>
-
-                    {/* Test Results */}
-                    {results && (
-                        <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
-                            <h3 className="text-lg font-semibold text-purple-400 mb-2">
-                                Test Results
-                            </h3>
-                            {results.map((result, index) => (
-                                <div
-                                    key={index}
-                                    className={`p-2 mb-2 rounded ${
-                                        result.passed
-                                            ? 'bg-green-900/50 text-green-200'
-                                            : 'bg-red-900/50 text-red-200'
-                                    }`}
                                 >
-                                    <div className="font-semibold flex items-center gap-2">
-                                        <span>
-                                            Test Case {result.testCase}:
+                                    {isRunning ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <svg
+                                                className="animate-spin h-5 w-5"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                    fill="none"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                />
+                                            </svg>
+                                            Running...
                                         </span>
-                                        {result.passed ? (
-                                            <span className="text-green-400">
-                                                ✓ Passed
-                                            </span>
-                                        ) : (
-                                            <span className="text-red-400">
-                                                ✗ Failed
-                                            </span>
-                                        )}
-                                    </div>
-                                    {!result.passed && (
-                                        <div className="text-sm mt-1">
-                                            {result.error ? (
-                                                <div className="text-red-300">
-                                                    {result.error
-                                                        .split('\n')
-                                                        .pop()}{' '}
-                                                    {/* Only show last line of error */}
+                                    ) : (
+                                        'Run Code'
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        setCode(
+                                            problem?.starterCodes[
+                                                selectedLanguage
+                                            ]
+                                        )
+                                    }
+                                    className="px-4 py-2.5 rounded border border-gray-600 text-gray-300 
+                     hover:bg-gray-700 transition text-sm font-medium"
+                                >
+                                    Reset Code
+                                </button>
+                            </div>
+
+                            {/* Test Results */}
+                            {results && (
+                                <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
+                                    <h3 className="text-lg font-semibold text-purple-400 mb-2">
+                                        Test Results
+                                    </h3>
+                                    {results.map((result, index) => (
+                                        <div
+                                            key={index}
+                                            className={`p-2 mb-2 rounded ${
+                                                result.passed
+                                                    ? 'bg-green-900/50 text-green-200'
+                                                    : 'bg-red-900/50 text-red-200'
+                                            }`}
+                                        >
+                                            <div className="font-semibold flex items-center gap-2">
+                                                <span>
+                                                    Test Case {result.testCase}:
+                                                </span>
+                                                {result.passed ? (
+                                                    <span className="text-green-400">
+                                                        ✓ Passed
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-red-400">
+                                                        ✗ Failed
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {!result.passed && (
+                                                <div className="text-sm mt-1">
+                                                    {result.error ? (
+                                                        <div className="text-red-300">
+                                                            {result.error
+                                                                .split('\n')
+                                                                .pop()}
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div>
+                                                                Input:{' '}
+                                                                {JSON.stringify(
+                                                                    result.input
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                Expected:{' '}
+                                                                {JSON.stringify(
+                                                                    result.expected
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                Received:{' '}
+                                                                {JSON.stringify(
+                                                                    result.received
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <div>
-                                                        Input:{' '}
-                                                        {JSON.stringify(
-                                                            result.input
-                                                        )}
+                                            )}
+                                            {result.stdout && (
+                                                <div className="text-sm mt-2">
+                                                    <div className="font-semibold">
+                                                        Stdout:
                                                     </div>
-                                                    <div>
-                                                        Expected:{' '}
-                                                        {JSON.stringify(
-                                                            result.expected
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        Received:{' '}
-                                                        {JSON.stringify(
-                                                            result.received
-                                                        )}
-                                                    </div>
-                                                </>
+                                                    <pre className="bg-gray-800 p-2 rounded mt-1 whitespace-pre-wrap">
+                                                        {result.stdout}
+                                                    </pre>
+                                                </div>
                                             )}
                                         </div>
-                                    )}
-                                    {result.stdout && (
-                                        <div className="text-sm mt-2">
-                                            <div className="font-semibold">
-                                                Stdout:
-                                            </div>
-                                            <pre className="bg-gray-800 p-2 rounded mt-1 whitespace-pre-wrap">
-                                                {result.stdout}
-                                            </pre>
-                                        </div>
-                                    )}
+                                    ))}
                                 </div>
-                            ))}
+                            )}
+                        </div>
+                    )}
+
+                    {/* AI Assistant Tab */}
+                    {activeTab === 'ai' && (
+                        <div>
+                            <h2 className="text-xl font-bold text-purple-400">
+                                AI Assistant
+                            </h2>
+                            <div className="flex-grow mt-4 overflow-y-auto bg-gray-900 p-4 rounded border border-gray-700">
+                                {messages.map((message, index) =>
+                                    message.role === 'user' ||
+                                    message.role === 'assistant' ? (
+                                        <div
+                                            key={index}
+                                            className={`mb-4 ${
+                                                message.role === 'user'
+                                                    ? 'text-blue-400'
+                                                    : 'text-gray-300'
+                                            }`}
+                                        >
+                                            <div className="font-bold mb-1">
+                                                {message.role === 'user'
+                                                    ? 'You:'
+                                                    : 'AI Assistant:'}
+                                            </div>
+                                            <ReactMarkdown
+                                                className="prose prose-invert max-w-none"
+                                                remarkPlugins={[
+                                                    remarkGfm,
+                                                    remarkMath,
+                                                ]}
+                                                rehypePlugins={[rehypeKatex]}
+                                                components={{
+                                                    code({
+                                                        node,
+                                                        inline,
+                                                        className,
+                                                        children,
+                                                        ...props
+                                                    }) {
+                                                        return (
+                                                            <code
+                                                                className={`${className} bg-gray-800 rounded px-1`}
+                                                                {...props}
+                                                            >
+                                                                {children}
+                                                            </code>
+                                                        );
+                                                    },
+                                                    pre({
+                                                        node,
+                                                        children,
+                                                        ...props
+                                                    }) {
+                                                        return (
+                                                            <div>
+                                                                <pre
+                                                                    className="bg-gray-800 p-4 rounded-lg overflow-x-auto"
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </pre>
+                                                                {message.content.includes(
+                                                                    "Here's the pseudocode"
+                                                                ) && (
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            navigator.clipboard.writeText(
+                                                                                message.content
+                                                                            )
+                                                                        }
+                                                                        className="mt-2 px-3 py-1 bg-gray-700 text-sm text-gray-300 rounded hover:bg-gray-600"
+                                                                    >
+                                                                        Copy
+                                                                        Pseudocode
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    },
+                                                }}
+                                            >
+                                                {message.content}
+                                            </ReactMarkdown>
+                                        </div>
+                                    ) : null
+                                )}
+                                {messages.length === 0 && (
+                                    <p className="text-gray-400">
+                                        Ask for hints or pseudocode here.
+                                    </p>
+                                )}
+                            </div>
+                            <form onSubmit={handleUserInput} className="mt-4">
+                                <textarea
+                                    value={userInput}
+                                    onChange={(e) =>
+                                        setUserInput(e.target.value)
+                                    }
+                                    className="w-full p-2 rounded border border-gray-700 text-gray-200 bg-gray-800 resize-none"
+                                    placeholder="Ask something..."
+                                    rows="2"
+                                />
+                                <button
+                                    type="submit"
+                                    className="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded shadow hover:bg-purple-600 transition"
+                                >
+                                    {loading ? 'Thinking...' : 'Send'}
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Notes Tab */}
+                    {activeTab === 'notes' && (
+                        <div className="bg-gray-900 p-4 rounded-lg">
+                            <h2 className="text-xl font-bold text-purple-400 mb-4">
+                                Notes
+                            </h2>
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                className="w-full p-2 rounded border border-gray-700 text-gray-200 bg-gray-800 resize-none"
+                                placeholder="Write your notes here..."
+                                rows="10"
+                            />
+                            <button
+                                onClick={saveNotes}
+                                disabled={isSaving}
+                                className="mt-2 px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-600 transition disabled:opacity-50"
+                            >
+                                {isSaving ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg
+                                            className="animate-spin h-5 w-5"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                                fill="none"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        Saving...
+                                    </span>
+                                ) : (
+                                    'Save Notes'
+                                )}
+                            </button>
                         </div>
                     )}
                 </Panel>
