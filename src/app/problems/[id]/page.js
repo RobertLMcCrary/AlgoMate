@@ -519,16 +519,7 @@ export default function ProblemPage() {
                         >
                             Code Editor
                         </button>
-                        <button
-                            onClick={() => setActiveTab('ai')}
-                            className={`px-4 py-2 rounded ${
-                                activeTab === 'ai'
-                                    ? 'bg-purple-700 text-white'
-                                    : 'bg-gray-700 text-gray-200'
-                            }`}
-                        >
-                            AI Assistant
-                        </button>
+
                         <button
                             onClick={() => setActiveTab('notes')}
                             className={`px-4 py-2 rounded ${
@@ -657,7 +648,7 @@ export default function ProblemPage() {
 
                             {/* Test Results */}
                             {results && (
-                                <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto max-h-[30vh]">
+                                <div className="mt-4 bg-gray-900 p-4 rounded-lg overflow-y-auto h-[23vh]">
                                     <h3 className="text-lg font-semibold text-purple-400 mb-2">
                                         Test Results
                                     </h3>
