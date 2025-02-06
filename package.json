@@ -22,6 +22,7 @@
     "@uiw/codemirror-theme-vscode": "^4.23.6",
     "@uiw/react-codemirror": "^4.23.6",
     "@vercel/analytics": "^1.4.1",
+    "@vercel/speed-insights": "^1.1.0",
     "codemirror": "^6.0.1",
     "glob": "^11.0.0",
     "huggingface": "^1.4.0",

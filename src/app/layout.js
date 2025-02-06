@@ -1,6 +1,11 @@
 import localFont from 'next/font/local';
 import './globals.css';
+
+//vercel analytics
 import { Analytics } from '@vercel/analytics/react';
+
+//vecel speed insights
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 //clerk
 import {
@@ -44,6 +49,7 @@ export default function RootLayout({ children }) {
                     <Toaster position="top-right" />
                     {children}
                     <Analytics />
+                    <SpeedInsights />
                     <script
                         src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"
                         async
