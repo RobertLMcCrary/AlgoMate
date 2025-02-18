@@ -31,6 +31,9 @@ function UsersPage() {
         const response = await fetch(`/api/users/${userId}`);
         const userData = await response.json();
 
+        //update rank
+        await fetch(`/api/users/${userId}`, { method: 'PUT' });
+
         // Fetch problem titles for each solved problem
         const solvedProblemsWithTitles = await Promise.all(
             userData.solvedProblems.map(async (problem) => {
