@@ -40,6 +40,7 @@ export async function POST(req) {
             solvedProblems: [],
             friends: [],
             notes: [],
+            rank: '',
         });
     }
     await client.close();
