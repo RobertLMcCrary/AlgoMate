@@ -100,6 +100,9 @@ function UsersPage() {
                                         <h3 className="font-semibold">
                                             {user.username}
                                         </h3>
+                                        <h3 className="font-semibold">
+                                            {user.rank}
+                                        </h3>
                                         <p className="text-sm text-gray-400">
                                             {`${
                                                 user.problemsSolved.easy +
@@ -136,6 +139,9 @@ function UsersPage() {
                                 </div>
                                 <h1 className="text-4xl font-bold">
                                     {selectedUser.username}
+                                </h1>
+                                <h1 className="text-4xl font-bold">
+                                    {selectedUser.rank}
                                 </h1>
                             </div>
 

@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
     const db = client.db('PseudoAI');
     const Users = db.collection('Users');
 
-    const userData = await Users.findOne({ clerkId: params.id });
+    const userData = await Users.findOne({ clerkId: id });
 
     await client.close();
 

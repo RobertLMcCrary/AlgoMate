@@ -22,7 +22,7 @@ export async function POST(req) {
     const client = await MongoClient.connect(process.env.MONGO_URI);
     const db = client.db('PseudoAI');
     const Users = db.collection('Users');
-    if (evt.type === 'user.created') {
+    if (evt.type === 'user.created' || evt.type === 'user.updated') {
         await Users.insertOne({
             clerkId: id,
             email: email_addresses[0].email_address,
@@ -40,7 +40,7 @@ export async function POST(req) {
             solvedProblems: [],
             friends: [],
             notes: [],
-            rank: '',
+            rank: 'Unranked',
         });
     }
     await client.close();
