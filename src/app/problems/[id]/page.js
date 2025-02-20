@@ -45,7 +45,7 @@ export default function ProblemPage() {
     const [results, setResults] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState('python');
 
-    //state management for teh tabs
+    //state management for the tabs
     const [activeTab, setActiveTab] = useState('code');
     const [notes, setNotes] = useState('');
     const [isSaving, setIsSaving] = useState(false);

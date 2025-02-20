@@ -34,12 +34,10 @@ function LeaderboardPage() {
         fetchUsers();
     }, []);
 
-    // Filter users based on search query
     const filteredUsers = users.filter((user) =>
         user.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Calculate pagination
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
@@ -48,42 +46,57 @@ function LeaderboardPage() {
     return (
         <div className="bg-gray-900 text-white min-h-screen">
             <Navbar />
-            <div className="max-w-4xl mx-auto py-16 px-4">
-                <h1 className="text-4xl font-bold text-center mb-8">
-                    Leaderboard
-                </h1>
-
-                {/* Search Bar */}
-                <div className="mb-6">
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-purple-500"
-                    />
+            <div className="max-w-6xl mx-auto py-16 px-4">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-4xl font-bold">Global Rankings</h1>
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-64 p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-purple-500"
+                        />
+                    </div>
                 </div>
 
-                <div className="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+                <div className="bg-gray-800 rounded-lg shadow-xl">
+                    <div className="grid grid-cols-12 text-sm font-semibold p-4 border-b border-gray-700">
+                        <div className="col-span-1">Rank</div>
+                        <div className="col-span-3">User</div>
+                        <div className="col-span-2 text-center">
+                            Total Solved
+                        </div>
+                        <div className="col-span-2 text-center text-green-400">
+                            Easy
+                        </div>
+                        <div className="col-span-2 text-center text-yellow-400">
+                            Medium
+                        </div>
+                        <div className="col-span-2 text-center text-red-400">
+                            Hard
+                        </div>
+                    </div>
+
                     <div className="divide-y divide-gray-700">
                         {currentUsers.map((user, index) => {
-                            const totalSolved =
-                                user.problemsSolved.easy +
-                                user.problemsSolved.medium +
-                                user.problemsSolved.hard;
                             const globalRank =
                                 users.findIndex(
                                     (u) => u.clerkId === user.clerkId
                                 ) + 1;
+                            const totalSolved =
+                                user.problemsSolved.easy +
+                                user.problemsSolved.medium +
+                                user.problemsSolved.hard;
 
                             return (
                                 <div
                                     key={user.clerkId}
-                                    className="p-6 hover:bg-gray-700 transition"
+                                    className="grid grid-cols-12 items-center p-4 hover:bg-gray-700 transition"
                                 >
-                                    <div className="flex items-center gap-6">
+                                    <div className="col-span-1">
                                         <span
-                                            className={`text-2xl font-bold ${
+                                            className={`text-xl font-bold ${
                                                 globalRank === 1
                                                     ? 'text-yellow-400'
                                                     : globalRank === 2
@@ -95,49 +108,43 @@ function LeaderboardPage() {
                                         >
                                             #{globalRank}
                                         </span>
+                                    </div>
 
-                                        <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-xl font-bold">
+                                    <div className="col-span-3 flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
                                             {user.imageUrl ? (
                                                 <Image
                                                     src={user.imageUrl}
                                                     alt={user.username}
-                                                    width={48}
-                                                    height={48}
+                                                    width={40}
+                                                    height={40}
                                                     className="rounded-full"
                                                 />
                                             ) : (
                                                 user.username[0].toUpperCase()
                                             )}
                                         </div>
-
-                                        <div className="flex-1">
-                                            <h3 className="text-xl font-semibold">
+                                        <div>
+                                            <div className="font-semibold">
                                                 {user.username}
-                                            </h3>
-                                            <div className="grid grid-cols-3 gap-4 mt-2 text-sm">
-                                                <span className="text-green-400">
-                                                    Easy:{' '}
-                                                    {user.problemsSolved.easy}
-                                                </span>
-                                                <span className="text-yellow-400">
-                                                    Medium:{' '}
-                                                    {user.problemsSolved.medium}
-                                                </span>
-                                                <span className="text-red-400">
-                                                    Hard:{' '}
-                                                    {user.problemsSolved.hard}
-                                                </span>
+                                            </div>
+                                            <div className="text-sm text-purple-400">
+                                                {user.rank}
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div className="text-right">
-                                            <div className="text-2xl font-bold">
-                                                {totalSolved}
-                                            </div>
-                                            <div className="text-sm text-gray-400">
-                                                problems solved
-                                            </div>
-                                        </div>
+                                    <div className="col-span-2 text-center font-bold text-xl">
+                                        {totalSolved}
+                                    </div>
+                                    <div className="col-span-2 text-center text-green-400">
+                                        {user.problemsSolved.easy}
+                                    </div>
+                                    <div className="col-span-2 text-center text-yellow-400">
+                                        {user.problemsSolved.medium}
+                                    </div>
+                                    <div className="col-span-2 text-center text-red-400">
+                                        {user.problemsSolved.hard}
                                     </div>
                                 </div>
                             );
@@ -145,18 +152,17 @@ function LeaderboardPage() {
                     </div>
                 </div>
 
-                {/* Pagination Controls */}
-                <div className="mt-6 flex justify-center gap-2">
+                <div className="mt-6 flex justify-center gap-4 items-center">
                     <button
                         onClick={() =>
                             setCurrentPage((prev) => Math.max(prev - 1, 1))
                         }
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50"
+                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50 hover:bg-gray-700"
                     >
                         Previous
                     </button>
-                    <span className="px-4 py-2">
+                    <span className="text-gray-400">
                         Page {currentPage} of {totalPages}
                     </span>
                     <button
@@ -166,7 +172,7 @@ function LeaderboardPage() {
                             )
                         }
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50"
+                        className="px-4 py-2 bg-gray-800 rounded-lg disabled:opacity-50 hover:bg-gray-700"
                     >
                         Next
                     </button>
