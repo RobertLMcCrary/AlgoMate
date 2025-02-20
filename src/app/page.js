@@ -288,7 +288,7 @@ function Home() {
                         </h2>
                         <p className="text-xl mb-8">
                             Join thousands of developers who are mastering DSA
-                            with PseudoAI's intelligent guidance.
+                            with PseudoAI&apos;s intelligent guidance.
                         </p>
                         <SignUpButton
                             mode="modal"
