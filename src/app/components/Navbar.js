@@ -48,7 +48,7 @@ function Navbar() {
                 {/* Logo */}
                 <Link href="/">
                     <span className="text-2xl font-bold text-white hover:text-gray-200 transition">
-                        PseudoAI
+                        AlgoMate
                     </span>
                 </Link>
 

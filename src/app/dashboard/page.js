@@ -29,8 +29,8 @@ function Dashboard() {
 
     const totalSolved = userData
         ? (userData.problemsSolved?.easy || 0) +
-        (userData.problemsSolved?.medium || 0) +
-        (userData.problemsSolved?.hard || 0)
+          (userData.problemsSolved?.medium || 0) +
+          (userData.problemsSolved?.hard || 0)
         : 0;
 
     return (
@@ -137,7 +137,7 @@ function Dashboard() {
 
                 <section className="bg-gray-800 p-8 rounded-3xl shadow-xl mb-12 hover:bg-gray-700 transition">
                     <h3 className="text-3xl font-bold text-gray-100 mb-6">
-                        Unlock PseudoAI Pro Features
+                        Unlock AlgoMate Pro Features
                     </h3>
                     <p className="text-gray-300 mb-6">
                         Get ready for mock interview video calls, live

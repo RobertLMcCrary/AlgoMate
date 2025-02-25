@@ -32,7 +32,7 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-    title: 'PseudoAI',
+    title: 'AlgoMate',
     description: 'Your AI Powered Interview Prep Tool',
 };
 

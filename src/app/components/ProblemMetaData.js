@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function ProblemSection({ problem }) {
     return (
-        <div className=" bg-gray-800 text-gray-200 p-6 h-[60vh] overflow-y-auto">
+        <div className=" bg-gray-800 text-gray-200 p-6 h-[70vh] overflow-y-auto">
             <Link className="text-blue-500 hover:underline" href="/problems">
                 Back to Problems
             </Link>

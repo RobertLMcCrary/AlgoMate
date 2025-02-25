@@ -11,7 +11,7 @@ function Footer() {
                     {/* Branding */}
                     <div className="text-center md:text-left mb-6 md:mb-0">
                         <h1 className="text-2xl font-bold text-white">
-                            PseudoAI
+                            AlgoMate
                         </h1>
                         <p className="text-sm text-gray-400">
                             Gamifying DSA Study for Interview Success
