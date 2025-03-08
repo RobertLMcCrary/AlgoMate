@@ -8,10 +8,6 @@ import CodeEditor from '../../components/CodeEditor';
 import ProblemMetaData from '../../components/ProblemMetaData';
 import NotePad from '../../components/NotePad';
 
-/* 
-can not make a separate component for the chat because it can't get context of the code editor or problem metadata
-*/
-
 //react markdown
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';

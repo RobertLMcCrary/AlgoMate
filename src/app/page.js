@@ -262,7 +262,7 @@ function Home() {
                 <main className="py-20 px-4 sm:px-8 md:px-16">
                     <section className="max-w-6xl mx-auto mb-20">
                         <h2 className="text-4xl font-bold text-center mb-16">
-                            How AlgoMate Transforms Your Practice
+                            How PseudoAI Transforms Your Practice
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                             <FeatureCard
@@ -288,7 +288,7 @@ function Home() {
                         </h2>
                         <p className="text-xl mb-8">
                             Join fellow developers who are mastering DSA with
-                            AlgoMate&apos;s intelligent guidance.
+                            PseudoAI&apos;s intelligent guidance.
                         </p>
                         <SignUpButton
                             mode="modal"

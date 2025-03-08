@@ -32,8 +32,8 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-    title: 'AlgoMate',
-    description: 'Your AI Powered Interview Prep Tool',
+    title: 'PseudoAI',
+    description: 'Your AI Powered Coding Interview Prep Tool',
 };
 
 export default function RootLayout({ children }) {
